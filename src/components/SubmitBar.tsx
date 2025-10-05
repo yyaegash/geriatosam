@@ -79,7 +79,7 @@ function useFooterBottomOffset(margin = 16) {
 interface Props {
   onSubmit: () => void;
   /** Élément d’ancrage (le <section> qui contient le formulaire). Optionnel. */
-  anchorRef?: React.RefObject<HTMLElement>;
+  anchorRef?: React.RefObject<HTMLElement | null>;
 }
 
 export function SubmitBar({ onSubmit, anchorRef }: Props) {

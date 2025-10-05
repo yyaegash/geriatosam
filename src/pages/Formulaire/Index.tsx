@@ -7,7 +7,8 @@ import { QuestionField } from "@/components/QuestionField";
 import { useLocalAnswers } from "@/hooks/useLocalAnswers";
 
 export default function FormulaireIndex() {
-  const formPaneRef = useRef<HTMLElement>(null);
+  const formPaneRef = useRef<HTMLElement | null>(null);
+
   // Onglet principal (Fragilité en premier par défaut)
   const [activeCategory, setActiveCategory] = useState<string>("Fragilité");
   // Sous-onglet Fragilité (uniquement quand activeCategory === "Fragilité")
