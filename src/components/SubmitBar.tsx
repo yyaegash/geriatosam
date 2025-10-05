@@ -2,8 +2,12 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
-/** Calcule left/width à partir d’un ref d’ancrage (optionnel & safe) */
-function useAnchorBox(anchorRef?: React.RefObject<HTMLElement>) {
+// ---------- Types
+type AnchorRef = React.RefObject<HTMLElement | null>;
+
+// ---------- Hooks
+/** Compute left/width from an anchor ref (safe & optional). */
+function useAnchorBox(anchorRef?: AnchorRef) {
   const [state, setState] = React.useState<{ left: number; width: number; ready: boolean }>({
     left: 16,
     width: 360,
@@ -14,7 +18,8 @@ function useAnchorBox(anchorRef?: React.RefObject<HTMLElement>) {
     if (!anchorRef?.current) return;
 
     const update = () => {
-      const el = anchorRef.current!;
+      const el = anchorRef.current;
+      if (!el) return;
       const rect = el.getBoundingClientRect();
       const left = rect.left + window.scrollX;
       const width = rect.width;
@@ -23,8 +28,9 @@ function useAnchorBox(anchorRef?: React.RefObject<HTMLElement>) {
 
     update();
 
-    const ro = new ResizeObserver(update);
-    ro.observe(anchorRef.current);
+    const ro = new ResizeObserver(() => update());
+    // cast is safe because we check el exists above
+    ro.observe(anchorRef.current as Element);
 
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
@@ -39,7 +45,7 @@ function useAnchorBox(anchorRef?: React.RefObject<HTMLElement>) {
   return state;
 }
 
-/** Détermine le décalage bottom pour rester au-dessus du footer quand il apparaît */
+/** Keep the bar above the footer when it enters the viewport. */
 function useFooterBottomOffset(margin = 16) {
   const [bottom, setBottom] = React.useState(margin);
 
@@ -47,9 +53,7 @@ function useFooterBottomOffset(margin = 16) {
     const update = () => {
       const footer = document.querySelector("footer");
       if (!footer) return setBottom(margin);
-
       const rect = footer.getBoundingClientRect();
-      // Chevauchement du footer dans la fenêtre (si > 0, il est visible)
       const overlap = window.innerHeight - rect.top;
       setBottom(overlap > 0 ? overlap + margin : margin);
     };
@@ -58,7 +62,6 @@ function useFooterBottomOffset(margin = 16) {
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
 
-    // si le footer change de taille (ex: responsive), on réajuste
     const footer = document.querySelector("footer");
     let ro: ResizeObserver | undefined;
     if (footer) {
@@ -76,26 +79,33 @@ function useFooterBottomOffset(margin = 16) {
   return bottom;
 }
 
+// ---------- Component
 interface Props {
   onSubmit: () => void;
-  /** Élément d’ancrage (le <section> qui contient le formulaire). Optionnel. */
-  anchorRef?: React.RefObject<HTMLElement | null>;
+  /** Anchor element (the <section> that contains the form). Optional. */
+  anchorRef?: AnchorRef;
 }
 
+/**
+ * Fixed submit bar:
+ * - always visible
+ * - aligns with the LEFT edge of the form panel
+ * - responsive width (full panel if narrow, compact otherwise)
+ * - never overlaps the footer
+ */
 export function SubmitBar({ onSubmit, anchorRef }: Props) {
   const { left, width, ready } = useAnchorBox(anchorRef);
   const bottom = useFooterBottomOffset(16);
 
-  // largeur : pleine largeur du panneau si étroit, sinon compact
-  const maxCompact = 520;
+  const maxCompact = 520; // px
   const barWidth = Math.max(240, Math.min(ready ? width : 360, maxCompact));
 
   return (
     <div
       style={{
         position: "fixed",
-        left: ready ? left : 16, // aligné sur le bord gauche du panneau
-        bottom,                   // se décale automatiquement au-dessus du footer
+        left: ready ? left : 16,
+        bottom,
         width: barWidth,
         zIndex: 50,
       }}
