@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Thème clair (ce que tu voulais) */
+:root { color-scheme: light; }
+
+/* Styles globaux example */
+html, body {
+  @apply bg-white text-gray-900 min-h-screen;
+}
