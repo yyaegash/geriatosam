@@ -1,9 +1,8 @@
 @import "tailwindcss";
+@reference "tailwindcss";
 
-/* Thème clair (ce que tu voulais) */
+/* Utilitaires */
+.no-scrollbar::-webkit-scrollbar{ display:none; }
+.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+
 :root { color-scheme: light; }
-
-/* Styles globaux example */
-html, body {
-  @apply bg-white text-gray-900 min-h-screen;
-}
