@@ -8,7 +8,7 @@ import { useLocalAnswers } from "@/hooks/useLocalAnswers";
 
 import AideEnPlaceCsv, {
   AideEnPlaceHandle,
-} from "./AideEnPlaceCsv";
+} from "./AideEnPlaceCSV";
 
 import IsolementCsv, {
   IsolementHandle,
