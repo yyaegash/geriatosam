@@ -174,7 +174,7 @@ export default function FormulaireIndex() {
               className="rounded-2xl border p-4 lg:p-6 shadow-sm"
             >
               <h2 className="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">
-                {isFragilite ? `Fragilité / ${activeFragTab}` : activeCategory}
+                {isFragilite ? `${activeFragTab}` : activeCategory}
               </h2>
 
               {/* Contenu */}

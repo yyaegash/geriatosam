@@ -1,5 +1,5 @@
 Group,Section,QPos,Question,Type,Options,Role,TriggerReportOn,Surveillance,Actions
-Fragilité,Aide en place et fréquence,1,Aides en place,radio,Oui|Non,,,,
+Fragilité,Aide en place et fréquence,1,Aides en place,radio,Oui|Non,lock,,,
 Fragilité,Aide en place et fréquence,2,Présence d’un(e) IDE,radio,1 fois par semaine|2 fois par semaine|3 fois par semaine ou plus,freq,,,
 Fragilité,Aide en place et fréquence,3,Présence d’un(e) aide-soignant(e),radio,1 fois par semaine|2 fois par semaine|3 fois par semaine ou plus,freq,,,
 Fragilité,Aide en place et fréquence,4,Présence d’un(e) auxiliaire de vie,radio,1 fois par semaine|2 fois par semaine|3 fois par semaine ou plus,freq,,,

@@ -1,11 +1,11 @@
 ,Group,Section,QPos,Question,Type,Options,Role,TriggerReportOn,Surveillance,Actions
-0,Isolement,Isolement,1,A revoir,radio,Oui|Non,,Oui,,
+0,Isolement,Isolement,1,À revoir,radio,Oui|Non,lock,Oui,À revoir,
 1,Isolement,Isolement,2,Insuffisance de relation sociale à l’origine d’une souffrance ou d’un danger,radio,Oui:100|Non:0,,Oui,,Envisager un recours auprès du DAC pour réévaluer la situation
 2,Isolement,Isolement,3,Absence de Médecin traitant,radio,Oui:50|Non:0,,Oui,Pas de Médecin traitant,Envisager un recours auprès du DAC pour réévaluer la situation|Recherche de médecin traitant via la CPTS
 3,Isolement,Isolement,4,Absence d’IDE bien que nécessaire,radio,Oui:50|Non:0,,Oui,Pas d’IDE,Envisager un recours auprès du DAC pour réévaluer la situation|Recherche d’IDE ou SSIAD
 4,Isolement,Isolement,5,Aides à domicile insuffisantes,radio,Oui:50|Non:0,,Oui,Aides insuffisantes,"Envisager un recours auprès du DAC pour réévaluer la situation|SSAD, discuter l’évaluation du GIR"
-5,Isolement,Isolement,6,Proche (ami-voisin-famille) vu <1 fois/semaine,radio,Oui:50|Non:0,,Oui,Pas de proches,Envisager un recours auprès du DAC pour réévaluer la situation
-6,Isolement,Isolement,7,Barrière de la langue,radio,Oui:50|Non:0,,Oui,Barrière de la langue,Envisager un recours auprès du DAC pour réévaluer la situation|Association proposant des visites de convivialité
-7,Isolement,Isolement,8,Difficulté numérique,radio,Oui:50|Non:0,,Oui,Difficulté numérique,Envisager un recours auprès du DAC pour réévaluer la situation|Association apprentissage de la langue + aide à la traduction
+5,Isolement,Isolement,6,Proche (ami-voisin-famille) vu <1 fois/semaine,radio,Oui:50|Non:0,,Oui,Pas de proches,Envisager un recours auprès du DAC pour réévaluer la situation|Association proposant des visites de convivialité
+6,Isolement,Isolement,7,Barrière de la langue,radio,Oui:50|Non:0,,Oui,Barrière de la langue,Envisager un recours auprès du DAC pour réévaluer la situation|Association apprentissage de la langue + aide à la traduction
+7,Isolement,Isolement,8,Difficulté numérique,radio,Oui:50|Non:0,,Oui,Difficulté numérique,Envisager un recours auprès du DAC pour réévaluer la situation|Association d'apprentissage numérique
 8,Isolement,Isolement,9,Sédentarité,radio,Oui:50|Non:0,,Oui,Sédentarité,Envisager un recours auprès du DAC pour réévaluer la situation|Transport PAM
 9,Isolement,Isolement,10,Qualité de la prise en charge actuelle,radio,Bonne|Partielle|Insuffisante,color,,,

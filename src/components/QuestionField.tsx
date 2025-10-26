@@ -6,7 +6,6 @@ interface QuestionDef {
   type: "text" | "textarea" | "radio" | "checkbox";
   options?: string[];
   placeholder?: string;
-  /** Indique si la question appartient au tableau "fréquences" lors du submit */
   freq?: boolean;
 }
 
@@ -14,24 +13,26 @@ interface Props {
   def: QuestionDef;
   value: any;
   onChange: (id: string, value: any) => void;
+  disabled?: boolean;
 }
 
-export function QuestionField({ def, value, onChange }: Props) {
+export function QuestionField({ def, value, onChange, disabled }: Props) {
   const id = def.id;
 
   if (def.type === "text") {
     return (
-      <div>
+      <div className={disabled ? "opacity-50" : ""}>
         <label htmlFor={id} className="text-sm font-medium block mb-1">
           {def.label}
         </label>
         <input
           id={id}
           type="text"
+          disabled={!!disabled}
           placeholder={def.placeholder || ""}
           value={value || ""}
           onChange={(e) => onChange(id, e.target.value)}
-          className="w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring"
+          className="w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring disabled:bg-gray-100"
         />
       </div>
     );
@@ -39,35 +40,33 @@ export function QuestionField({ def, value, onChange }: Props) {
 
   if (def.type === "textarea") {
     return (
-      <div>
+      <div className={disabled ? "opacity-50" : ""}>
         <label htmlFor={id} className="text-sm font-medium block mb-1">
           {def.label}
         </label>
         <textarea
           id={id}
           rows={3}
+          disabled={!!disabled}
           placeholder={def.placeholder || ""}
           value={value || ""}
           onChange={(e) => onChange(id, e.target.value)}
-          className="w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring"
+          className="w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring disabled:bg-gray-100"
         />
       </div>
     );
   }
 
   if (def.type === "radio") {
-    // 1) name unique par composant (évite les collisions quand 2 vues coexistent)
     const groupId = useId();
 
-    // 2) permet de déselectionner au double-clic
     const handleDoubleClick = (opt: string) => {
-      if (value === opt) {
-        onChange(id, "");
-      }
+      if (disabled) return;
+      if (value === opt) onChange(id, "");
     };
 
     return (
-      <fieldset className="space-y-1">
+      <fieldset className={disabled ? "opacity-50" : ""}>
         <legend className="text-sm font-medium">{def.label}</legend>
         <div className="flex flex-col gap-2 mt-1">
           {def.options?.map((opt) => {
@@ -80,11 +79,11 @@ export function QuestionField({ def, value, onChange }: Props) {
               >
                 <input
                   type="radio"
-                  name={`${id}__${groupId}`} // <- unique
+                  name={`${id}__${groupId}`}
                   value={opt}
                   checked={checked}
-                  onChange={() => onChange(id, opt)}
-                  // si on reclique sur la même option (simple clic), on laisse le comportement standard
+                  disabled={!!disabled}
+                  onChange={() => !disabled && onChange(id, opt)}
                 />
                 {opt}
               </label>
@@ -97,14 +96,13 @@ export function QuestionField({ def, value, onChange }: Props) {
 
   if (def.type === "checkbox") {
     const arr = Array.isArray(value) ? value : [];
-    const toggle = (opt: string) =>
-      onChange(
-        id,
-        arr.includes(opt) ? arr.filter((x) => x !== opt) : [...arr, opt]
-      );
+    const toggle = (opt: string) => {
+      if (disabled) return;
+      onChange(id, arr.includes(opt) ? arr.filter((x) => x !== opt) : [...arr, opt]);
+    };
 
     return (
-      <fieldset className="space-y-1">
+      <fieldset className={disabled ? "opacity-50" : ""}>
         <legend className="text-sm font-medium">{def.label}</legend>
         <div className="flex flex-wrap gap-3 mt-1">
           {def.options?.map((opt) => (
@@ -112,6 +110,7 @@ export function QuestionField({ def, value, onChange }: Props) {
               <input
                 type="checkbox"
                 checked={arr.includes(opt)}
+                disabled={!!disabled}
                 onChange={() => toggle(opt)}
               />
               {opt}
