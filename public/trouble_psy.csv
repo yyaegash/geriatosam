@@ -1,0 +1,8 @@
+;Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+0;Troubles psychiques;Troubles psychiques;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+1;Troubles psychiques;Troubles psychiques;2;Sentiment de dépression ou mini GDS ≥1;radio;Oui:50|Non:0;;Oui;Dépression;Envisager un suivi psychologique, voir psychiatrique en cas de sévérité|Eliminer une anomalie somatique à l’origine de la dépression.|Evaluer le risque suicidaire. Antidépresseur en fonction de la sévérité, faire un ECG avant introduction. Evaluer le risque suicidaire
+2;Troubles psychiques;Troubles psychiques;3;Anxiété généralisée;radio;Oui:50|Non:0;;Oui;Anxiété;Envisager un suivi psychologique, voir psychiatrique en cas de sévérité|Envisager des antidépresseurs adaptés à l’anxiété
+3;Troubles psychiques;Troubles psychiques;4;Notion de délire, d’hallucination ou pathologie psychotique connue;radio;Oui:50|Non:0;;Oui;Délire;Envisager un suivi psychologique, voir psychiatrique en cas de sévérité|Un avis psycho-gériatrique peut distinguer une pathologie psychiatrique pure et une démence sous-jacente. Un traitement médicamenteux pourra être discuté
+4;Troubles psychiques;Troubles psychiques;5;Addiction à l’alcool, aux médicaments, à une drogue dure;radio;Oui:50|Non:0;;Oui;Addiction;Envisager un suivi psychologique, voir psychiatrique en cas de sévérité|Proposer une réduction des risques. Un avis addictologique peut être demandé +-CSAPA
+5;Troubles psychiques;Troubles psychiques;6;Retentissement sur la vie quotidienne;radio;Oui:100|Non:0;;;;
+6;Troubles psychiques;Troubles psychiques;7;Qualité de la prise en charge actuelle;radio;Bonne|Partielle|Insuffisante;color;;;

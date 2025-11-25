@@ -1,0 +1,7 @@
+;Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+0;Habitation inadaptée;Habitation inadaptée;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+1;Habitation inadaptée;Habitation inadaptée;2;Non adaptée au handicap;radio;Oui:50|Non:0;;Oui;Non adaptée au handicap;Possibilité d'intervention du DAC pour mise en relation avec les différents services. EHPAD à envisager en cas de mise en danger|Bilan d'ergothérapie, APA ou MDPH pour prise en charge de l'aménagement et/ou dossier de logement adapté
+2;Habitation inadaptée;Habitation inadaptée;3;Syndrome de Diogène;radio;Oui:50|Non:0;;Oui;Syndrome de Diogène;Possibilité d'intervention du DAC pour mise en relation avec les différents services. EHPAD à envisager en cas de mise en danger|Services spécialisés Diogène, psychothérapie
+3;Habitation inadaptée;Habitation inadaptée;4; Insalubre;radio;Oui:50|Non:0;;Oui; Insalubre;Possibilité d'intervention du DAC pour mise en relation avec les différents services. EHPAD à envisager en cas de mise en danger|SAAD pour mise en place d'aide-ménagères
+4;Habitation inadaptée;Habitation inadaptée;5;Répercussion sévère;radio;Oui:100|Non:0;;;;;
+5;Habitation inadaptée;Habitation inadaptée;6;Qualité de la prise en charge actuelle;radio;Bonne|Partielle|Insuffisante;color;;;;

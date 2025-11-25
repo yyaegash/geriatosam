@@ -5,12 +5,106 @@ import { VerticalTabs } from "@/components/VerticalTabs";
 import { QuestionField } from "@/components/QuestionField";
 
 import AideEnPlaceCsv, { AideEnPlaceHandle, SummaryRow } from "./AideEnPlaceCsv";
-import IsolementCsv, { IsolementHandle, IsolementSummary } from "./IsolementCsv";
 import DependanceCsv, { DependanceHandle, DependanceSummary } from "./DependanceCsv";
 
-import { FORM_CATEGORIES, FRAGILITE_SUBTABS, QUESTIONS } from "@/data/questions";
+import GenericCsvForm, {
+  GenericCsvFormHandle,
+  GenericSummary,
+} from "./GenericCsvForm";
 
-// ---- Hook media query ----
+import { FORM_CATEGORIES, QUESTIONS } from "@/data/questions";
+
+/* ============================================================
+   1) Déclaration DYNAMIQUE des formulaires CSV (ordre = ordre ici)
+   - Pour ajouter un formulaire : ajoute une ligne ci-dessous.
+   - component:
+       "aide" -> AideEnPlaceCsv (overlay listing)
+       "dep"  -> DependanceCsv  (overlay scores)
+       "generic-isolement" -> GenericCsvForm en mode "isolement" (overlay isolement)
+       "generic-generic"   -> GenericCsvForm en mode "generic"   (overlay générique Q/R)
+   ============================================================ */
+
+const CSV_FORMS = [
+  {
+    key: "aide",
+    label: "Aide en place et fréquence",
+    path: "/aide_en_place.csv",
+    component: "aide" as const,
+    storageKey: "geriatrie.form.aide.v1"
+  },
+  {
+    key: "iso",
+    label: "Isolement",
+    path: "/isolement.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.isolement.v1"
+  },
+  {
+    key: "dep",
+    label: "Dépendance",
+    path: "/dependance.csv",
+    component: "dep" as const,
+    storageKey: "geriatrie.form.dependance.v1"
+  },
+  {
+    key: "poly",
+    label: "Polypathologie",
+    path: "/polypathologie.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.polypathologie.v1"
+  },
+  {
+    key: "denut",
+    label: "Dénutrition",
+    path: "/denutrition.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.denutrition.v1"
+  },
+  {
+    key: "habit",
+    label: "Habitation inadaptée",
+    path: "/habitation_inadaptee.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.habitation.v1"
+  },
+  {
+    key: "polymed",
+    label: "Polymédication et traitements à risque",
+    path: "/polymedication.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.polymedication.v1"
+  },
+  {
+    key: "psy",
+    label: "Troubles psychiques",
+    path: "/trouble_psy.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.psy.v1"
+  },
+  {
+    key: "neuro",
+    label: "Troubles neurosensoriels",
+    path: "/trouble_neuro.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.neuro.v1"
+  },
+  {
+    key: "neuroco",
+    label: "Troubles neurocognitifs",
+    path: "/trouble_neuroco.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.neuroco.v1"
+  },
+
+];
+
+type CsvFormEntry = typeof CSV_FORMS[number];
+type ComponentKind = CsvFormEntry["component"];
+
+/* ============================================================
+   2) Utilities (media query + check CSV presence)
+   ============================================================ */
+
 function useMediaQuery(query: string) {
   const [match, setMatch] = useState(false);
   useEffect(() => {
@@ -23,17 +117,11 @@ function useMediaQuery(query: string) {
   return match;
 }
 
-// ---- Vérifie si un asset CSV existe (et non vide)
-function useCsvPresence() {
-  const [has, setHas] = useState<{ [k: string]: boolean }>({});
+// Vérifie la présence/vides de tous les CSV déclarés
+function useCsvPresence(config: CsvFormEntry[]) {
+  const [has, setHas] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const paths = {
-      aide: "/aide_en_place.csv",
-      iso: "/isolement.csv",
-      dep: "/dependance.csv",
-    };
-
     async function check(url: string) {
       try {
         const r = await fetch(url, { method: "GET", cache: "no-store" });
@@ -46,15 +134,22 @@ function useCsvPresence() {
     }
 
     (async () => {
-      const [a, i, d] = await Promise.all([check(paths.aide), check(paths.iso), check(paths.dep)]);
-      setHas({ aide: a, iso: i, dep: d });
+      const entries = await Promise.all(
+        config.map(async (c) => [c.key, await check(c.path)] as const)
+      );
+      const map: Record<string, boolean> = {};
+      for (const [k, ok] of entries) map[k] = ok;
+      setHas(map);
     })();
-  }, []);
+  }, [config]);
 
   return has;
 }
 
-// ---- Fallback generic form (pour QUESTIONS.*)
+/* ============================================================
+   3) Fallback générique (QUESTIONS.ts) pour tout onglet sans CSV
+   ============================================================ */
+
 type FallbackQuestion = { id: string; label: string; type: "text" | "textarea" | "radio" | "checkbox"; options?: string[] };
 type FallbackHandle = {
   buildSummary: () => { question: string; answer: string }[];
@@ -116,37 +211,48 @@ const FallbackForm = forwardRef<FallbackHandle, { storageKey: string; questions:
   }
 );
 
-// ---- Page principale
+/* ============================================================
+   4) Page principale
+   ============================================================ */
+
 export default function FormulaireIndex() {
+  // Sous-onglets Fragilité dynamiques : d’abord les CSV (ordre défini ci-dessus), puis le reste de QUESTIONS.Fragilité
+  const dynamicFragSubtabs = useMemo(() => {
+    const csvLabels = CSV_FORMS.map((c) => c.label);
+    const extras = Object.keys(QUESTIONS.Fragilité || {}).filter((l) => !csvLabels.includes(l));
+    return [...csvLabels, ...extras];
+  }, []);
+
   // Navigation
   const [activeCategory, setActiveCategory] = useState<string>(FORM_CATEGORIES[0] || "Fragilité");
-  const [activeFragTab, setActiveFragTab] = useState<string>(FRAGILITE_SUBTABS[0]);
+  const [activeFragTab, setActiveFragTab] = useState<string>(dynamicFragSubtabs[0]);
 
   const isFragilite = activeCategory === "Fragilité";
-  const isAide = isFragilite && activeFragTab === "Aide en place et fréquence";
-  const isIso = isFragilite && activeFragTab === "Isolement";
-  const isDep = isFragilite && activeFragTab === "Dépendance";
-
-  // Responsive
   const isMdUp = useMediaQuery("(min-width: 768px)");
 
-  // Présence des CSV
-  const csvHas = useCsvPresence();
+  // Quel formulaire CSV correspond à l’onglet courant ?
+  const currentCsvForm = useMemo<CsvFormEntry | undefined>(
+    () => CSV_FORMS.find((c) => isFragilite && c.label === activeFragTab),
+    [isFragilite, activeFragTab]
+  );
 
-  // Refs
+  // Présence CSV
+  const csvHas = useCsvPresence(CSV_FORMS);
+
+  // Refs (composants)
   const formPaneRef = useRef<HTMLElement>(null!);
   const aideRef = useRef<AideEnPlaceHandle | null>(null);
-  const isoRef = useRef<IsolementHandle | null>(null);
   const depRef = useRef<DependanceHandle | null>(null);
+  const genericRef = useRef<GenericCsvFormHandle | null>(null);
   const fallbackRef = useRef<FallbackHandle | null>(null);
 
-  // Résultats overlays
-  const [resultsTable, setResultsTable] = useState<{ freq: SummaryRow[]; other: SummaryRow[] } | null>(null);
-  const [resultsIso, setResultsIso] = useState<IsolementSummary | null>(null);
+  // Overlays (résultats)
+  const [resultsAide, setResultsAide] = useState<{ freq: SummaryRow[]; other: SummaryRow[] } | null>(null);
   const [resultsDep, setResultsDep] = useState<DependanceSummary | null>(null);
-  const [resultsFallback, setResultsFallback] = useState<{ rows: { question: string; answer: string }[]; title: string } | null>(null);
+  const [resultsIso, setResultsIso] = useState<GenericSummary | null>(null);     // kind: "isolement"
+  const [resultsGeneric, setResultsGeneric] = useState<{ title: string; rows: { question: string; answer: string }[] } | null>(null);
 
-  // Questions fallback actuelles selon l’onglet
+  // Questions fallback selon l’onglet
   const fallbackQuestions: FallbackQuestion[] = useMemo(() => {
     if (isFragilite) {
       const arr = (QUESTIONS.Fragilité && QUESTIONS.Fragilité[activeFragTab]) || [];
@@ -156,51 +262,58 @@ export default function FormulaireIndex() {
     return Array.isArray(arr) ? arr : [];
   }, [activeCategory, activeFragTab, isFragilite]);
 
+  // Décide si on rend CSV (si déclaré ET présent) ou fallback
   const showCsvForCurrent = useMemo(() => {
-    // Afficher le CSV si présent ET si on est sur l’un des trois onglets dédiés
-    if (isAide) return !!csvHas.aide;
-    if (isIso) return !!csvHas.iso;
-    if (isDep) return !!csvHas.dep;
-    return false; // les autres sous-onglets n'ont pas de CSV
-  }, [isAide, isIso, isDep, csvHas]);
+    if (!currentCsvForm) return false;
+    return !!csvHas[currentCsvForm.key];
+  }, [currentCsvForm, csvHas]);
 
-  // Submit
+  // Submit (route dynamiquement vers le bon overlay)
   function handleSubmit() {
-    if (showCsvForCurrent) {
-      if (isDep) {
-        const sum = depRef.current?.buildSummary();
-        if (sum) { setResultsDep(sum); return; }
-      }
-      if (isIso) {
-        const sum = isoRef.current?.buildSummary();
-        if (sum) { setResultsIso(sum); return; }
-      }
-      if (isAide) {
-        const sum = aideRef.current?.buildSummary();
-        if (sum) { setResultsTable(sum); return; }
+    if (showCsvForCurrent && currentCsvForm) {
+      switch (currentCsvForm.component as ComponentKind) {
+        case "aide": {
+          const sum = aideRef.current?.buildSummary();
+          if (sum) { setResultsAide(sum); return; }
+          break;
+        }
+        case "dep": {
+          const sum = depRef.current?.buildSummary();
+          if (sum) { setResultsDep(sum); return; }
+          break;
+        }
+        case "generic-isolement": {
+          const sum = genericRef.current?.buildSummary();
+          if (sum && sum.kind === "isolement") { setResultsIso(sum); return; }
+          if (sum && sum.kind === "generic") {
+            setResultsGeneric({ title: currentCsvForm.label, rows: sum.rows });
+            return;
+          }
+          break;
+        }
       }
     }
 
-    // Fallback
+    // Fallback (QUESTIONS.ts)
     const rows = fallbackRef.current?.buildSummary() || [];
     const title = isFragilite ? activeFragTab : activeCategory;
-    setResultsFallback({ rows, title });
+    setResultsGeneric({ title, rows });
   }
 
   function handleConfirmAndClearAll() {
     aideRef.current?.clearLocal?.();
-    isoRef.current?.clearLocal?.();
     depRef.current?.clearLocal?.();
+    genericRef.current?.clearLocal?.();
     fallbackRef.current?.clearLocal?.();
-    setResultsTable(null);
-    setResultsIso(null);
+
+    setResultsAide(null);
     setResultsDep(null);
-    setResultsFallback(null);
+    setResultsIso(null);
+    setResultsGeneric(null);
   }
 
-  // Rendu du contenu de la 3e colonne (form)
+  // Rendu du contenu (colonne formulaire)
   const renderFormContent = () => {
-    // Titre : sans "Fragilité /"
     const title = isFragilite ? activeFragTab : activeCategory;
 
     return (
@@ -213,13 +326,19 @@ export default function FormulaireIndex() {
       >
         <h2 className="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">{title}</h2>
 
-        {showCsvForCurrent ? (
-          isAide ? (
+        {showCsvForCurrent && currentCsvForm ? (
+          currentCsvForm.component === "aide" ? (
             <AideEnPlaceCsv ref={aideRef} />
-          ) : isIso ? (
-            <IsolementCsv ref={isoRef} />
-          ) : isDep ? (
-            <DependanceCsv ref={depRef} />
+          ) : currentCsvForm.component === "dep" ? (
+            <DependanceCsv ref={depRef} csvPath={currentCsvForm.path} />
+          ) : currentCsvForm.component === "generic-isolement" ? (
+            <GenericCsvForm
+              ref={genericRef}
+              csvPath={currentCsvForm.path}
+              sectionName={currentCsvForm.label}
+              storageKey={currentCsvForm.storageKey}
+              mode="isolement"
+            />
           ) : null
         ) : (
           <FallbackForm
@@ -243,17 +362,17 @@ export default function FormulaireIndex() {
               active={activeCategory}
               onSelect={(v) => {
                 setActiveCategory(v);
-                if (v === "Fragilité") setActiveFragTab(FRAGILITE_SUBTABS[0]);
+                if (v === "Fragilité") setActiveFragTab(dynamicFragSubtabs[0]);
               }}
               title="Sections"
             />
           </aside>
 
-          {/* Colonne 2 : Sous-onglets Fragilité */}
+          {/* Colonne 2 : Sous-onglets Fragilité (dynamiques) */}
           <aside>
             {isFragilite ? (
               <VerticalTabs
-                items={[...FRAGILITE_SUBTABS]}
+                items={[...dynamicFragSubtabs]}
                 active={activeFragTab}
                 onSelect={setActiveFragTab}
                 title="Fragilité — catégories"
@@ -283,13 +402,13 @@ export default function FormulaireIndex() {
               active={activeCategory}
               onSelect={(v) => {
                 setActiveCategory(v);
-                if (v === "Fragilité") setActiveFragTab(FRAGILITE_SUBTABS[0]);
+                if (v === "Fragilité") setActiveFragTab(dynamicFragSubtabs[0]);
               }}
             />
             {isFragilite && (
               <VerticalTabs
                 title="Fragilité — catégories"
-                items={[...FRAGILITE_SUBTABS]}
+                items={[...dynamicFragSubtabs]}
                 active={activeFragTab}
                 onSelect={setActiveFragTab}
               />
@@ -305,43 +424,34 @@ export default function FormulaireIndex() {
         </>
       )}
 
-      {/* OVERLAY — Aide (tableaux) */}
-      {resultsTable && (
+      {/* OVERLAY — Aide (listing lisible mobile) */}
+      {resultsAide && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="text-base font-semibold">Récapitulatif — {activeFragTab}</h3>
+              <h3 className="text-base font-semibold">Récapitulatif — Aide en place et fréquence</h3>
               <p className="text-xs text-gray-500">Synthèse de vos réponses.</p>
             </div>
 
             <div className="p-4">
               {(() => {
                 const combined = [
-                  ...resultsTable.freq.map((r) => ({ ...r, _freq: true })),
-                  ...resultsTable.other.map((r) => ({ ...r, _freq: false })),
+                  ...resultsAide.freq.map((r) => ({ ...r, _freq: true })),
+                  ...resultsAide.other.map((r) => ({ ...r, _freq: false })),
                 ];
-
                 if (combined.length === 0) {
                   return <p className="text-sm text-gray-500">Aucune réponse à afficher.</p>;
                 }
-
                 return (
                   <ul className="divide-y divide-gray-200">
                     {combined.map((item, idx) => (
                       <li key={idx} className="py-3">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          {/* Question + tag éventuel */}
                           <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-medium text-sm sm:text-base">{item.question}</span>
-                            </div>
+                            <span className="font-medium text-sm sm:text-base">{item.question}</span>
                           </div>
-
-                          {/* Réponse en badge */}
                           <div className="shrink-0">
-                            <span className="inline-block px-2.5 py-1 text-xs text-gray-800">
-                              {item.answer}
-                            </span>
+                            <span className="inline-block px-2.5 py-1 text-xs text-gray-800">{item.answer}</span>
                           </div>
                         </div>
                       </li>
@@ -352,16 +462,10 @@ export default function FormulaireIndex() {
             </div>
 
             <div className="px-4 py-3 border-t flex flex-col sm:flex-row gap-2 sm:justify-end">
-              <button
-                className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
-                onClick={() => setResultsTable(null)}
-              >
+              <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsAide(null)}>
                 Fermer
               </button>
-              <button
-                className="rounded-lg bg-black text-white px-4 py-2 text-sm hover:bg-gray-800"
-                onClick={handleConfirmAndClearAll}
-              >
+              <button className="rounded-lg bg-black text-white px-4 py-2 text-sm hover:bg-gray-800" onClick={handleConfirmAndClearAll}>
                 Valider et effacer
               </button>
             </div>
@@ -369,18 +473,18 @@ export default function FormulaireIndex() {
         </div>
       )}
 
-      {/* OVERLAY — Isolement */}
-      {resultsIso && (
+      {/* OVERLAY — Formulaires CSV (GenericCsvForm en mode isolement) */}
+      {resultsIso && resultsIso.kind === "isolement" && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="text-base font-semibold">Synthèse — Isolement</h3>
+              <h3 className="text-base font-semibold">Synthèse — {currentCsvForm?.label || "Formulaire"}</h3>
               <p className="text-xs text-gray-500">Score agrégé et rapport de prise en charge.</p>
             </div>
             <div className="p-4 space-y-6">
               <div>
                 <div className="flex items-center gap-3">
-                  <div className="w-24 text-sm text-gray-600">Isolement</div>
+                  <div className="w-24 text-sm text-gray-600">{currentCsvForm?.label || "Score"}</div>
                   <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full"
@@ -432,97 +536,38 @@ export default function FormulaireIndex() {
         </div>
       )}
 
-      {/* OVERLAY — Dépendance */}
-      {resultsDep && (
+      {/* OVERLAY — Générique (sert pour Polypathologie et fallback QUESTIONS.ts) */}
+      {resultsGeneric && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="text-base font-semibold">Synthèse — Dépendance</h3>
-              <p className="text-xs text-gray-500">Scores ADL / IADL et rapport.</p>
-            </div>
-            <div className="p-4 space-y-6">
-              {[
-                { label: "ADL", score: resultsDep.adlScore, max: resultsDep.adlMax },
-                { label: "IADL", score: resultsDep.iadlScore, max: resultsDep.iadlMax },
-              ].map(({ label, score, max }) => {
-                const pct = Math.round((Math.max(0, Math.min(max, score)) / max) * 100);
-                return (
-                  <div key={label}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-24 text-sm text-gray-600">{label}</div>
-                      <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full" style={{ width: `${pct}%`, backgroundColor: "#111827" }} />
-                      </div>
-                      <div className="w-16 text-sm text-right">{score} / {max}</div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-semibold mb-2">Repérage gériatrique</h4>
-                  {resultsDep.report.reperage.length ? (
-                    <ul className="list-disc pl-5 text-sm space-y-1">
-                      {resultsDep.report.reperage.map((it, i) => <li key={`r-${i}`}>{it}</li>)}
-                    </ul>
-                  ) : <p className="text-xs text-gray-500">Aucun élément.</p>}
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold mb-2">Proposition de prise en charge</h4>
-                  {resultsDep.report.proposition.length ? (
-                    <ul className="list-disc pl-5 text-sm space-y-1">
-                      {resultsDep.report.proposition.map((it, i) => <li key={`p-${i}`}>{it}</li>)}
-                    </ul>
-                  ) : <p className="text-xs text-gray-500">Aucune proposition.</p>}
-                </div>
-              </div>
-            </div>
-            <div className="px-4 py-3 border-t flex flex-col sm:flex-row gap-2 sm:justify-end">
-              <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsDep(null)}>
-                Fermer
-              </button>
-              <button className="rounded-lg bg-black text-white px-4 py-2 text-sm hover:bg-gray-800" onClick={handleConfirmAndClearAll}>
-                Valider et effacer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* OVERLAY — Fallback générique */}
-      {resultsFallback && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
-            <div className="px-4 py-3 border-b">
-              <h3 className="text-base font-semibold">Récapitulatif — {resultsFallback.title}</h3>
-              <p className="text-xs text-gray-500">Synthèse des réponses (fallback).</p>
+              <h3 className="text-base font-semibold">Récapitulatif — {resultsGeneric.title}</h3>
+              <p className="text-xs text-gray-500">Synthèse des réponses.</p>
             </div>
             <div className="p-4">
-              {resultsFallback.rows.length ? (
-                <div className="border rounded-xl overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="text-left p-2 w-2/3">Question</th>
-                        <th className="text-left p-2">Réponse</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {resultsFallback.rows.map((r, i) => (
-                        <tr key={`fb-${i}`} className="border-t">
-                          <td className="p-2">{r.question}</td>
-                          <td className="p-2">{r.answer}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              {resultsGeneric.rows.length ? (
+                <ul className="divide-y divide-gray-200">
+                  {resultsGeneric.rows.map((r, i) => (
+                    <li key={`fb-${i}`} className="py-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="font-medium text-sm sm:text-base">{r.question}</span>
+                        </div>
+                        <div className="shrink-0">
+                          <span className="inline-block rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-800">
+                            {r.answer}
+                          </span>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               ) : (
                 <p className="text-sm text-gray-500">Aucune réponse.</p>
               )}
             </div>
             <div className="px-4 py-3 border-t flex flex-col sm:flex-row gap-2 sm:justify-end">
-              <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsFallback(null)}>
+              <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsGeneric(null)}>
                 Fermer
               </button>
               <button className="rounded-lg bg-black text-white px-4 py-2 text-sm hover:bg-gray-800" onClick={handleConfirmAndClearAll}>
