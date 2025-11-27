@@ -4,10 +4,8 @@ import { ClipboardList, Home, Stethoscope, Building2, BookOpen } from "lucide-re
 
 const tabs = [
   { label: "Présentation", path: "/", icon: Home },
-  { label: "Formulaire", path: "/formulaire", icon: ClipboardList },
-  { label: "Prise en charge", path: "/prise-en-charge", icon: Stethoscope },
-  { label: "En ville", path: "/en-ville", icon: Building2 },
-  { label: "Références", path: "/references", icon: BookOpen },
+  { label: "Evaluation gériatrique globale", path: "/formulaire", icon: ClipboardList },
+  { label: "Aide à la consultation", path: "/prise-en-charge", icon: Stethoscope },
 ];
 
 export default function Header() {

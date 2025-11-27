@@ -47,20 +47,6 @@ const CSV_FORMS = [
     storageKey: "geriatrie.form.dependance.v1"
   },
   {
-    key: "poly",
-    label: "Polypathologie",
-    path: "/polypathologie.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.polypathologie.v1"
-  },
-  {
-    key: "denut",
-    label: "Dénutrition",
-    path: "/denutrition.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.denutrition.v1"
-  },
-  {
     key: "habit",
     label: "Habitation inadaptée",
     path: "/habitation_inadaptee.csv",
@@ -68,11 +54,11 @@ const CSV_FORMS = [
     storageKey: "geriatrie.form.habitation.v1"
   },
   {
-    key: "polymed",
-    label: "Polymédication et traitements à risque",
-    path: "/polymedication.csv",
+    key: "neuroco",
+    label: "Troubles neurocognitifs",
+    path: "/trouble_neuroco.csv",
     component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.polymedication.v1"
+    storageKey: "geriatrie.form.neuroco.v1"
   },
   {
     key: "psy",
@@ -82,6 +68,20 @@ const CSV_FORMS = [
     storageKey: "geriatrie.form.psy.v1"
   },
   {
+    key: "musculo",
+    label: "Troubles musculosquelettiques",
+    path: "/trouble_musculo.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.musculo.v1"
+  },
+  {
+    key: "denut",
+    label: "Dénutrition",
+    path: "/denutrition.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.denutrition.v1"
+  },
+  {
     key: "neuro",
     label: "Troubles neurosensoriels",
     path: "/trouble_neuro.csv",
@@ -89,13 +89,19 @@ const CSV_FORMS = [
     storageKey: "geriatrie.form.neuro.v1"
   },
   {
-    key: "neuroco",
-    label: "Troubles neurocognitifs",
-    path: "/trouble_neuroco.csv",
+    key: "polypathologie",
+    label: "Polypathologie",
+    path: "/polypathologie.csv",
     component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.neuroco.v1"
+    storageKey: "geriatrie.form.polypathologie.v1"
   },
-
+  {
+    key: "polymedication",
+    label: "Polymédication et traitement à risque",
+    path: "/polymedication.csv",
+    component: "generic-isolement" as const,
+    storageKey: "geriatrie.form.polymedication.v1"
+  },
 ];
 
 type CsvFormEntry = typeof CSV_FORMS[number];
