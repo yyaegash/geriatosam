@@ -1,25 +1,14 @@
 /** Ordre des catégories principales dans la page Formulaire */
 export const FORM_CATEGORIES: string[] = [
   "Fragilité",
-  "Évaluation clinique",
-  "Évaluation biologique",
+  "Problèmes médicaux",
+  "Problèmes sociaux-environementaux",
+  "Repérage clinique",
+  "Repérage biologique",
+  "Fiche de fragilités phénotypiques",
+  "Fiche d'informations personnelles",
 ];
 
-/** Ordre des sous-onglets de FRAGILITÉ (exactement comme l’image) */
-export const FRAGILITE_SUBTABS: string[] = [
-  "Aide en place et fréquence",
-  "Isolement",
-  "Dépendance",
-  "Habitation inadaptée",
-  "Troubles neurocognitifs",
-  "Troubles psychiques",
-  "Troubles musculosquelettiques",
-  "Dénutrition",
-  "Troubles neurosensoriels",
-  "Polypathologie",
-  "Polymédication et traitement à risque",
-  "Echelle de Fried",
-];
 
 /** Modèle de données questions (placeholder prêt à être remplacé par les vraies questions) */
 export const QUESTIONS: Record<string, any> = {
@@ -96,15 +85,6 @@ export const QUESTIONS: Record<string, any> = {
         type: "checkbox",
         options: ["Benzodiazépines", "Anticholinergiques", "AINS", "Autres"],
       },
-    ],
-    "Echelle de Fried": [
-      {
-        id: "frag.fried.criteres",
-        label: "Critères atteints",
-        type: "checkbox",
-        options: ["Amaigrissement", "Épuisement", "Faible activité", "Marche lente", "Faiblesse"],
-      },
-      { id: "frag.fried.score", label: "Score (0–5)", type: "text" },
     ],
   },
 

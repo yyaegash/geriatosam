@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { SubmitBar } from "@/components/SubmitBar";
 import { VerticalTabs } from "@/components/VerticalTabs";
 import { QuestionField } from "@/components/QuestionField";
+import { CSV_VULNERABILITY_FORMS } from "./GeriatricAssessment/Vulnerability";
 
 import AideEnPlaceCsv, { AideEnPlaceHandle, SummaryRow } from "./AideEnPlaceCsv";
 import DependanceCsv, { DependanceHandle, DependanceSummary } from "./DependanceCsv";
@@ -14,97 +15,10 @@ import GenericCsvForm, {
 
 import { FORM_CATEGORIES, QUESTIONS } from "@/data/questions";
 
-/* ============================================================
-   1) Déclaration DYNAMIQUE des formulaires CSV (ordre = ordre ici)
-   - Pour ajouter un formulaire : ajoute une ligne ci-dessous.
-   - component:
-       "aide" -> AideEnPlaceCsv (overlay listing)
-       "dep"  -> DependanceCsv  (overlay scores)
-       "generic-isolement" -> GenericCsvForm en mode "isolement" (overlay isolement)
-       "generic-generic"   -> GenericCsvForm en mode "generic"   (overlay générique Q/R)
-   ============================================================ */
+import { buildGeriatriePdfPayload } from "./buildGeriatriePdfPayload";
+import { generateGeriatriePdf, reconstructGenericFromCsv } from "./exportGeriatricPdf";
 
-const CSV_FORMS = [
-  {
-    key: "aide",
-    label: "Aide en place et fréquence",
-    path: "/aide_en_place.csv",
-    component: "aide" as const,
-    storageKey: "geriatrie.form.aide.v1"
-  },
-  {
-    key: "iso",
-    label: "Isolement",
-    path: "/isolement.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.isolement.v1"
-  },
-  {
-    key: "dep",
-    label: "Dépendance",
-    path: "/dependance.csv",
-    component: "dep" as const,
-    storageKey: "geriatrie.form.dependance.v1"
-  },
-  {
-    key: "habit",
-    label: "Habitation inadaptée",
-    path: "/habitation_inadaptee.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.habitation.v1"
-  },
-  {
-    key: "neuroco",
-    label: "Troubles neurocognitifs",
-    path: "/trouble_neuroco.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.neuroco.v1"
-  },
-  {
-    key: "psy",
-    label: "Troubles psychiques",
-    path: "/trouble_psy.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.psy.v1"
-  },
-  {
-    key: "musculo",
-    label: "Troubles musculosquelettiques",
-    path: "/trouble_musculo.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.musculo.v1"
-  },
-  {
-    key: "denut",
-    label: "Dénutrition",
-    path: "/denutrition.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.denutrition.v1"
-  },
-  {
-    key: "neuro",
-    label: "Troubles neurosensoriels",
-    path: "/trouble_neuro.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.neuro.v1"
-  },
-  {
-    key: "polypathologie",
-    label: "Polypathologie",
-    path: "/polypathologie.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.polypathologie.v1"
-  },
-  {
-    key: "polymedication",
-    label: "Polymédication et traitement à risque",
-    path: "/polymedication.csv",
-    component: "generic-isolement" as const,
-    storageKey: "geriatrie.form.polymedication.v1"
-  },
-];
-
-type CsvFormEntry = typeof CSV_FORMS[number];
+type CsvFormEntry = typeof CSV_VULNERABILITY_FORMS[number];
 type ComponentKind = CsvFormEntry["component"];
 
 /* ============================================================
@@ -224,13 +138,13 @@ const FallbackForm = forwardRef<FallbackHandle, { storageKey: string; questions:
 export default function FormulaireIndex() {
   // Sous-onglets Fragilité dynamiques : d’abord les CSV (ordre défini ci-dessus), puis le reste de QUESTIONS.Fragilité
   const dynamicFragSubtabs = useMemo(() => {
-    const csvLabels = CSV_FORMS.map((c) => c.label);
+    const csvLabels = CSV_VULNERABILITY_FORMS.map((c) => c.label);
     const extras = Object.keys(QUESTIONS.Fragilité || {}).filter((l) => !csvLabels.includes(l));
     return [...csvLabels, ...extras];
   }, []);
 
   // Navigation
-  const [activeCategory, setActiveCategory] = useState<string>(FORM_CATEGORIES[0] || "Fragilité");
+  const [activeCategory, setActiveCategory] = useState<string>("Fragilité");
   const [activeFragTab, setActiveFragTab] = useState<string>(dynamicFragSubtabs[0]);
 
   const isFragilite = activeCategory === "Fragilité";
@@ -238,25 +152,23 @@ export default function FormulaireIndex() {
 
   // Quel formulaire CSV correspond à l’onglet courant ?
   const currentCsvForm = useMemo<CsvFormEntry | undefined>(
-    () => CSV_FORMS.find((c) => isFragilite && c.label === activeFragTab),
+    () => CSV_VULNERABILITY_FORMS.find((c) => isFragilite && c.label === activeFragTab),
     [isFragilite, activeFragTab]
   );
 
   // Présence CSV
-  const csvHas = useCsvPresence(CSV_FORMS);
+  const csvHas = useCsvPresence(CSV_VULNERABILITY_FORMS);
 
   // Refs (composants)
   const formPaneRef = useRef<HTMLElement>(null!);
   const aideRef = useRef<AideEnPlaceHandle | null>(null);
   const depRef = useRef<DependanceHandle | null>(null);
   const genericRef = useRef<GenericCsvFormHandle | null>(null);
-  const fallbackRef = useRef<FallbackHandle | null>(null);
 
   // Overlays (résultats)
   const [resultsAide, setResultsAide] = useState<{ freq: SummaryRow[]; other: SummaryRow[] } | null>(null);
   const [resultsDep, setResultsDep] = useState<DependanceSummary | null>(null);
-  const [resultsIso, setResultsIso] = useState<GenericSummary | null>(null);     // kind: "isolement"
-  const [resultsGeneric, setResultsGeneric] = useState<{ title: string; rows: { question: string; answer: string }[] } | null>(null);
+  const [resultsGeneric, setResultsGeneric] = useState<GenericSummary | null>(null);
 
   // Questions fallback selon l’onglet
   const fallbackQuestions: FallbackQuestion[] = useMemo(() => {
@@ -275,7 +187,7 @@ export default function FormulaireIndex() {
   }, [currentCsvForm, csvHas]);
 
   // Submit (route dynamiquement vers le bon overlay)
-  function handleSubmit() {
+  function handlePreview() {
     if (showCsvForCurrent && currentCsvForm) {
       switch (currentCsvForm.component as ComponentKind) {
         case "aide": {
@@ -288,33 +200,42 @@ export default function FormulaireIndex() {
           if (sum) { setResultsDep(sum); return; }
           break;
         }
-        case "generic-isolement": {
+        case "generic-generic": {
           const sum = genericRef.current?.buildSummary();
-          if (sum && sum.kind === "isolement") { setResultsIso(sum); return; }
-          if (sum && sum.kind === "generic") {
-            setResultsGeneric({ title: currentCsvForm.label, rows: sum.rows });
-            return;
-          }
+          if (sum && sum.kind === "generic") { setResultsGeneric(sum); return; }
           break;
         }
       }
     }
+  }
 
-    // Fallback (QUESTIONS.ts)
-    const rows = fallbackRef.current?.buildSummary() || [];
-    const title = isFragilite ? activeFragTab : activeCategory;
-    setResultsGeneric({ title, rows });
+  async function handleValidateAll() {
+    const payload = await buildGeriatriePdfPayload({
+        aideRef,
+        depRef,
+        genericRef,
+        currentCsvKey: currentCsvForm?.key,
+      });
+
+    console.log(
+      "PDF PAYLOAD",
+      payload.generics.map(g => ({
+        label: g.label,
+        reperage: g.summary.report.reperage,
+        proposition: g.summary.report.proposition,
+      }))
+    );
+
+    await generateGeriatriePdf(payload);
   }
 
   function handleConfirmAndClearAll() {
     aideRef.current?.clearLocal?.();
     depRef.current?.clearLocal?.();
     genericRef.current?.clearLocal?.();
-    fallbackRef.current?.clearLocal?.();
 
     setResultsAide(null);
     setResultsDep(null);
-    setResultsIso(null);
     setResultsGeneric(null);
   }
 
@@ -337,21 +258,17 @@ export default function FormulaireIndex() {
             <AideEnPlaceCsv ref={aideRef} />
           ) : currentCsvForm.component === "dep" ? (
             <DependanceCsv ref={depRef} csvPath={currentCsvForm.path} />
-          ) : currentCsvForm.component === "generic-isolement" ? (
+          ) : currentCsvForm.component === "generic-generic" ? (
             <GenericCsvForm
               ref={genericRef}
               csvPath={currentCsvForm.path}
               sectionName={currentCsvForm.label}
               storageKey={currentCsvForm.storageKey}
-              mode="isolement"
+              mode="generic"
             />
           ) : null
         ) : (
-          <FallbackForm
-            ref={fallbackRef}
-            storageKey={`fallback.${isFragilite ? `frag.${activeFragTab}` : activeCategory}`}
-            questions={fallbackQuestions}
-          />
+          null
         )}
       </motion.div>
     );
@@ -396,7 +313,13 @@ export default function FormulaireIndex() {
             <div aria-hidden className="h-24 md:h-16"></div>
 
             {/* Bouton fixed */}
-            <SubmitBar onSubmit={handleSubmit} anchorRef={formPaneRef} />
+            <SubmitBar
+               onSubmit={handlePreview}
+               anchorRef={formPaneRef}
+               onValidate={handleValidateAll}
+               submitLabel="Preview"
+               validateLabel="Valider"
+             />
           </section>
         </div>
       ) : (
@@ -425,7 +348,13 @@ export default function FormulaireIndex() {
             {renderFormContent()}
 
             <div aria-hidden className="h-24 md:h-16"></div>
-            <SubmitBar onSubmit={handleSubmit} anchorRef={formPaneRef} />
+            <SubmitBar
+              onSubmit={handlePreview}
+              anchorRef={formPaneRef}
+              onValidate={handleValidateAll}
+              submitLabel="Preview"
+              validateLabel="Valider"
+            />
           </section>
         </>
       )}
@@ -479,8 +408,76 @@ export default function FormulaireIndex() {
         </div>
       )}
 
-      {/* OVERLAY — Formulaires CSV (GenericCsvForm en mode isolement) */}
-      {resultsIso && resultsIso.kind === "isolement" && (
+      {resultsDep && (
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
+            <div className="px-4 py-3 border-b">
+              <h3 className="text-base font-semibold">Synthèse — Dépendance</h3>
+              <p className="text-xs text-gray-500">Scores ADL / IADL et rapport.</p>
+            </div>
+
+            <div className="p-4 space-y-6">
+              {/* Barres ADL / IADL */}
+              {[
+                { label: "ADL", score: resultsDep.adlScore, max: resultsDep.adlMax },
+                { label: "IADL", score: resultsDep.iadlScore, max: resultsDep.iadlMax },
+              ].map(({ label, score, max }) => {
+                const pct = Math.round((Math.max(0, Math.min(max, score)) / max) * 100);
+                return (
+                  <div key={label}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-24 text-sm text-gray-600">{label}</div>
+                      <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full" style={{ width: `${pct}%`, backgroundColor: "#111827" }} />
+                      </div>
+                      <div className="w-16 text-sm text-right">{score} / {max}</div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Rapport 2 colonnes */}
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Repérage gériatrique</h4>
+                  {resultsDep.report.reperage.length ? (
+                    <ul className="list-disc pl-5 text-sm space-y-1">
+                      {resultsDep.report.reperage.map((it, i) => <li key={`r-${i}`}>{it}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-gray-500">Aucun élément.</p>
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Proposition de prise en charge</h4>
+                  {resultsDep.report.proposition.length ? (
+                    <ul className="list-disc pl-5 text-sm space-y-1">
+                      {resultsDep.report.proposition.map((it, i) => <li key={`p-${i}`}>{it}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-gray-500">Aucune proposition.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-4 py-3 border-t flex flex-col sm:flex-row gap-2 sm:justify-end">
+              <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsDep(null)}>
+                Fermer
+              </button>
+              <button
+                className="rounded-lg bg-black text-white px-4 py-2 text-sm hover:bg-gray-800"
+                onClick={() => { setResultsDep(null); /* si tu veux, efface aussi local: */ /* dependanceRef.current?.clearLocal(); */ }}
+              >
+                Valider
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY — Formulaires CSV (GenericCsvForm) */}
+      {resultsGeneric && resultsGeneric.kind === "generic" && (
         <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
             <div className="px-4 py-3 border-b">
@@ -495,16 +492,16 @@ export default function FormulaireIndex() {
                     <div
                       className="h-full"
                       style={{
-                        width: `${Math.min(100, Math.max(0, resultsIso.score))}%`,
+                        width: `${Math.min(100, Math.max(0, resultsGeneric.score))}%`,
                         backgroundColor:
-                          resultsIso.color === "green" ? "#16a34a"
-                            : resultsIso.color === "orange" ? "#f59e0b"
-                            : resultsIso.color === "red" ? "#dc2626"
+                          resultsGeneric.color === "green" ? "#16a34a"
+                            : resultsGeneric.color === "orange" ? "#f59e0b"
+                            : resultsGeneric.color === "red" ? "#dc2626"
                             : "#9ca3af",
                       }}
                     />
                   </div>
-                  <div className="w-10 text-sm">{resultsIso.score}</div>
+                  <div className="w-10 text-sm">{resultsGeneric.score}</div>
                 </div>
                 <div className="mt-1 flex justify-between text-xs text-gray-500">
                   <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
@@ -514,63 +511,21 @@ export default function FormulaireIndex() {
               <div className="grid sm:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-sm font-semibold mb-2">Repérage gériatrique</h4>
-                  {resultsIso.report.reperage.length ? (
+                  {resultsGeneric.report.reperage.length ? (
                     <ul className="list-disc pl-5 text-sm space-y-1">
-                      {resultsIso.report.reperage.map((it, i) => <li key={`rep-${i}`}>{it}</li>)}
+                      {resultsGeneric.report.reperage.map((it, i) => <li key={`rep-${i}`}>{it}</li>)}
                     </ul>
                   ) : <p className="text-xs text-gray-500">Aucun élément.</p>}
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold mb-2">Proposition de prise en charge</h4>
-                  {resultsIso.report.proposition.length ? (
+                  {resultsGeneric.report.proposition.length ? (
                     <ul className="list-disc pl-5 text-sm space-y-1">
-                      {resultsIso.report.proposition.map((it, i) => <li key={`prop-${i}`}>{it}</li>)}
+                      {resultsGeneric.report.proposition.map((it, i) => <li key={`prop-${i}`}>{it}</li>)}
                     </ul>
                   ) : <p className="text-xs text-gray-500">Aucune proposition.</p>}
                 </div>
               </div>
-            </div>
-            <div className="px-4 py-3 border-t flex flex-col sm:flex-row gap-2 sm:justify-end">
-              <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsIso(null)}>
-                Fermer
-              </button>
-              <button className="rounded-lg bg-black text-white px-4 py-2 text-sm hover:bg-gray-800" onClick={handleConfirmAndClearAll}>
-                Valider et effacer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* OVERLAY — Générique (sert pour Polypathologie et fallback QUESTIONS.ts) */}
-      {resultsGeneric && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
-            <div className="px-4 py-3 border-b">
-              <h3 className="text-base font-semibold">Récapitulatif — {resultsGeneric.title}</h3>
-              <p className="text-xs text-gray-500">Synthèse des réponses.</p>
-            </div>
-            <div className="p-4">
-              {resultsGeneric.rows.length ? (
-                <ul className="divide-y divide-gray-200">
-                  {resultsGeneric.rows.map((r, i) => (
-                    <li key={`fb-${i}`} className="py-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <div className="min-w-0">
-                          <span className="font-medium text-sm sm:text-base">{r.question}</span>
-                        </div>
-                        <div className="shrink-0">
-                          <span className="inline-block rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-800">
-                            {r.answer}
-                          </span>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">Aucune réponse.</p>
-              )}
             </div>
             <div className="px-4 py-3 border-t flex flex-col sm:flex-row gap-2 sm:justify-end">
               <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50" onClick={() => setResultsGeneric(null)}>

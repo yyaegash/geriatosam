@@ -1,0 +1,11 @@
+;Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+0;Troubles du sommeil;Troubles du sommeil;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+1;Troubles du sommeil;Troubles du sommeil;2;Troubles du sommeil ressenti;radio;Oui:50|Non:0;;Oui;;Agenda de sommeil. Evaluer le retentissement diurne (Epworth). Rechercher une cause fréquente.|Rappeler les règles hygiéno-diététiques. Traiter la cause, éviter les hypnotiques. Proposer de la mélatonine en première intention, des BZD ponctuellement de demi vie courte en 2ème intention
+2;Troubles du sommeil;Troubles du sommeil;3;Arguments en faveur d’une cause;information;;;;;
+3;Troubles du sommeil;Troubles du sommeil;4;SAHOS ou éléments le faisant suspecter   ;radio;Oui:50|Non:0;;Oui;Possiblement lié à SAHOS;Polysomnographie et traitement en fonction des résultats. Eviter les BZD
+4;Troubles du sommeil;Troubles du sommeil;5;Syndrome des jambes sans repos  ;radio;Oui:50|Non:0;;Oui;Possiblement lié à un syndrome des jambes sans repos  ;Discuter le traitement du syndrome des jambes sans repos (effets secondaires++) après élimination de cause secondaire
+5;Troubles du sommeil;Troubles du sommeil;6;Anxiété   ;radio;Oui:50|Non:0;;Oui;Possiblement lié à une anxiété;Psychothérapie, BZD à envisager.
+6;Troubles du sommeil;Troubles du sommeil;7;Abus d’alcool ou de psychotrope;radio;Oui:50|Non:0;;Oui;Possiblement lié à un abus d’alcool ou de psychotrope;Discuter une réduction des risque et/ou un sevrage en partenariat avec un addictologique
+7;Troubles du sommeil;Troubles du sommeil;8;Démence;radio;Oui:50|Non:0;;Oui;Possiblement lié à une démence;Protéger les lieux où la personne dort. Revoir la prise en charge spécifique de la démence
+7;Troubles du sommeil;Troubles du sommeil;9;Retentissement diurne : troubles de la vigilance, échelle d’Epworth>10;radio;Oui:100|Non:0;;;;
+8;Troubles du sommeil;Troubles du sommeil;10;Qualité de la prise en charge actuelle;radio;Bonne|Partielle|Insuffisante;color;;;

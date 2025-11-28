@@ -8,22 +8,18 @@ import { QuestionField } from "@/components/QuestionField";
 
 export type GenericSummary =
   | {
-      kind: "isolement";
+      kind: "generic";
       score: number; // 0..100 (capé)
       color: "green" | "orange" | "red" | "grey";
       report: { reperage: string[]; proposition: string[] };
     }
-  | {
-      kind: "generic";
-      rows: { question: string; answer: string }[];
-    };
 
 export type GenericCsvFormHandle = {
   buildSummary: () => GenericSummary;
   clearLocal: () => void;
 };
 
-type Mode = "isolement" | "generic";
+type Mode = "generic";
 
 /* =======================
  * Types internes
@@ -57,7 +53,7 @@ type Question = {
 };
 
 type Props = {
-  csvPath: string;          // ex: "/isolement.csv"
+  csvPath: string;          // ex: "/generic.csv"
   sectionName: string;      // ex: "Isolement" / "Polypathologie"
   storageKey: string;       // ex: "geriatrie.form.isolement.v1"
   mode: Mode;               // "isolement" | "generic"
@@ -185,7 +181,7 @@ export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsv
 
   // Couleur (mode isolement) à partir d’une question Role=color
   const isoColor: "green" | "orange" | "red" | "grey" = useMemo(() => {
-    if (mode !== "isolement") return "grey";
+    if (mode !== "generic") return "grey";
     const qc = questions.find((q) => q.role === "color");
     if (!qc) return "grey";
     const v = answers[qc.id];
@@ -199,7 +195,7 @@ export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsv
 
   // Summary
   const buildSummary = (): GenericSummary => {
-    if (mode === "isolement") {
+    if (mode === "generic") {
       // Score = somme des scores des options sélectionnées (cap à 100)
       let total = 0;
       const reperageSet = new Set<string>();
@@ -227,7 +223,7 @@ export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsv
       const score = Math.max(0, Math.min(100, Math.round(total)));
 
       return {
-        kind: "isolement",
+        kind: "generic",
         score,
         color: isoColor,
         report: {

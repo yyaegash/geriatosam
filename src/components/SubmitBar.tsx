@@ -1,140 +1,81 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { useMemo } from "react";
 
-type AnchorRef = React.RefObject<HTMLElement | null>;
+type Props = {
+  onSubmit: () => void;       // ouvre la preview du formulaire courant
+  onValidate?: () => void;    // compile TOUT et génère le PDF
+  anchorRef?: React.RefObject<HTMLElement>; // non obligatoire, conservé pour compat
+  submitLabel?: string;
+  validateLabel?: string;
+};
 
-function useMediaQuery(query: string) {
-  const [match, setMatch] = React.useState(false);
-  React.useEffect(() => {
-    const m = window.matchMedia(query);
-    const onChange = (e: MediaQueryListEvent) => setMatch(e.matches);
-    setMatch(m.matches);
-    m.addEventListener("change", onChange);
-    return () => m.removeEventListener("change", onChange);
-  }, [query]);
-  return match;
-}
-
-/** Compute left/width from an anchor ref (safe & optional). */
-function useAnchorBox(anchorRef?: AnchorRef) {
-  const [state, setState] = React.useState<{ left: number; width: number; ready: boolean }>({
-    left: 16,
-    width: 360,
-    ready: false,
-  });
-
-  React.useEffect(() => {
-    if (!anchorRef?.current) return;
-
-    const update = () => {
-      const el = anchorRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setState({
-        left: rect.left + window.scrollX,
-        width: rect.width,
-        ready: true,
-      });
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(anchorRef.current as Element);
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [anchorRef]);
-
-  return state;
-}
-
-/** Keep the bar above the footer when it enters the viewport. */
-function useFooterBottomOffset(margin = 16) {
-  const [bottom, setBottom] = React.useState(margin);
-  React.useEffect(() => {
-    const update = () => {
-      const footer = document.querySelector("footer");
-      if (!footer) {
-        setBottom(margin);
-        return;
-      }
-      const rect = footer.getBoundingClientRect();
-      const overlap = window.innerHeight - rect.top;
-      setBottom(overlap > 0 ? overlap + margin : margin);
-    };
-    update();
-
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-
-    const footer = document.querySelector("footer");
-    let ro: ResizeObserver | undefined;
-    if (footer) {
-      ro = new ResizeObserver(update);
-      ro.observe(footer);
-    }
-
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      ro?.disconnect();
-    };
-  }, [margin]);
-  return bottom;
-}
-
-interface Props {
-  onSubmit: () => void;
-  anchorRef?: AnchorRef;
-}
-
-/**
- * Fixed submit bar:
- * - always visible
- * - mobile: full width between 16px margins
- * - ≥ md: aligned with the LEFT edge of the form panel (anchorRef)
- * - never overlaps the footer
- */
-export function SubmitBar({ onSubmit, anchorRef }: Props) {
-  const isMdUp = useMediaQuery("(min-width: 768px)");
-  const { left, width, ready } = useAnchorBox(anchorRef);
-  const bottom = useFooterBottomOffset(16);
-
-  const maxCompact = 520;
-  const barWidth = Math.max(240, Math.min(ready ? width : 360, maxCompact));
-
-  const style: React.CSSProperties = isMdUp
-    ? {
-        position: "fixed",
-        left: ready ? left : 16,
-        bottom,
-        width: barWidth,
-        zIndex: 50,
-      }
-    : {
-        position: "fixed",
-        left: 16,
-        right: 16,
-        bottom,
-        zIndex: 50,
-      };
+export function SubmitBar({
+  onSubmit,
+  onValidate,
+  anchorRef, // non utilisé activement, gardé pour compat future
+  submitLabel = "Preview",
+  validateLabel = "Valider",
+}: Props) {
+  // Si un jour tu veux conditionner la largeur à anchorRef, tu peux le faire ici.
+  const hasValidate = useMemo(() => typeof onValidate === "function", [onValidate]);
 
   return (
-    <div style={style} className="pointer-events-auto">
-      <div className="flex w-full items-center gap-3 rounded-2xl border bg-white/95 px-3 py-2 shadow-xl">
-        <p className="hidden sm:block text-xs text-gray-600">
-          Vous pouvez valider à tout moment.
-        </p>
-        <Button onClick={onSubmit} size="lg" className="h-10">
-          <Send size={16} className="mr-2" />
-          Soumettre
-        </Button>
+    <div
+      className="fixed inset-x-0 bottom-0 z-[60] pointer-events-none"
+      // safe area iOS
+      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0px)" }}
+    >
+      {/* Conteneur fluide plein écran sur mobile, centré + max-w sur grands écrans */}
+      <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 pb-3 pointer-events-none">
+        {/* Carte responsive : plein écran mobile, compacte desktop */}
+        <div
+          className="
+            pointer-events-auto
+            mx-0 sm:mx-auto
+            rounded-xl md:rounded-2xl
+            border bg-white/95 shadow-lg backdrop-blur
+            px-3 py-2 sm:px-4 sm:py-3
+            // Layout largeur :
+            w-full
+            lg:w-auto lg:ml-auto
+            // Gestion de l'empilement des boutons :
+            flex flex-col gap-2
+            xs:flex-row xs:flex-wrap xs:justify-end
+          "
+        >
+          <button
+            type="button"
+            onClick={onSubmit}
+            className="
+              inline-flex items-center justify-center
+              rounded-lg border
+              px-4 py-2 text-sm font-medium
+              hover:bg-gray-50
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-black
+              w-full xs:w-auto
+            "
+            aria-label={submitLabel}
+          >
+            {submitLabel}
+          </button>
+
+          {hasValidate && (
+            <button
+              type="button"
+              onClick={onValidate}
+              className="
+                inline-flex items-center justify-center
+                rounded-lg bg-black text-white
+                px-4 py-2 text-sm font-medium
+                hover:bg-gray-800
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-black
+                w-full xs:w-auto
+              "
+              aria-label={validateLabel}
+            >
+              {validateLabel}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

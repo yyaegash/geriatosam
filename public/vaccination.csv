@@ -1,0 +1,8 @@
+;Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+0;Vaccinations à compléter;Vaccinations à compléter;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+1;Vaccinations à compléter;Vaccinations à compléter;2;Après 65 ans : Vaccination non réalisée;information;;;;;
+2;Vaccinations à compléter;Vaccinations à compléter;3;1 dose de DTPc dans les 10 dernière années;radio;Oui:50|Non:0;;Oui;DTPc pas à jour;Proposer le vaccin DTPc
+3;Vaccinations à compléter;Vaccinations à compléter;4;1 dose de Pneumocoque 20 valences;radio;Oui:50|Non:0;;Oui;Vaccin anti Pneumocoque pas à jour;Proposer le vaccin pneumocoque 20 valence (Prevenar 20)
+4;Vaccinations à compléter;Vaccinations à compléter;5;2 doses de VZV;radio;Oui:50|Non:0;;Oui;Vaccin anti VZV pas à jour;Proposer le vaccin VZV Shingrinx en 2 doses
+5;Vaccinations à compléter;Vaccinations à compléter;6;1 dose de Grippe durant la saison;radio;Oui:50|Non:0;;Oui;Vaccin anti grippe pas à jour;Proposer le vaccin antigrippal
+6;Vaccinations à compléter;Vaccinations à compléter;7;1 dose COVID à l’automne et 1 rappel au printemps pour les plus de 80 ans;radio;Oui:50|Non:0;;Oui;Vaccin anti COVID pas à jour;Proposer le vaccin COVID
