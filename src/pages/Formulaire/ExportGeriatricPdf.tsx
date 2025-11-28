@@ -1,7 +1,6 @@
-// src/pages/Formulaire/pdf/exportGeriatricPdf.tsx
-import type { SummaryRow } from "../AideEnPlaceCsv";
-import type { DependanceSummary } from "../DependanceCsv";
-import type { GenericSummary } from "../GenericCsvForm";
+import type { SummaryRow } from "./AideEnPlaceCsv";
+import type { DependanceSummary } from "./DependanceCsv";
+import type { GenericSummary } from "./GenericCsvForm";
 
 /** Couleurs d’histogramme */
 export type HistoColor = "green" | "orange" | "red" | "grey" | "black";
@@ -115,7 +114,6 @@ export async function reconstructGenericFromCsv(
       score,
       color,
       report: { reperage: Array.from(reperage), proposition: Array.from(proposition) },
-      rows: [], // non nécessaire pour le PDF
     };
   } catch {
     return null;
@@ -158,7 +156,7 @@ export async function generateGeriatriePdf(payload: PdfPayload) {
   };
 
   const addPageFooter = () => {
-    const pageCount = doc.internal.getNumberOfPages();
+    const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFont("helvetica", "normal");
@@ -368,8 +366,8 @@ export async function generateGeriatriePdf(payload: PdfPayload) {
     const prop = g.summary.report?.proposition || [];
 
     const hasText =
-      rep.some((s) => s && s.trim().length > 0) ||
-      prop.some((s) => s && s.trim().length > 0);
+      rep.some((s: string) => s && s.trim().length > 0) ||
+      prop.some((s: string) => s && s.trim().length > 0);
 
     const hasScore =
       g.summary.score != null &&

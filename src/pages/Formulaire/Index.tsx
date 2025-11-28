@@ -16,7 +16,7 @@ import GenericCsvForm, {
 import { FORM_CATEGORIES, QUESTIONS } from "@/data/questions";
 
 import { buildGeriatriePdfPayload } from "./buildGeriatriePdfPayload";
-import { generateGeriatriePdf, reconstructGenericFromCsv } from "./exportGeriatricPdf";
+import { generateGeriatriePdf, reconstructGenericFromCsv } from "./ExportGeriatricPdf";
 
 type CsvFormEntry = typeof CSV_VULNERABILITY_FORMS[number];
 type ComponentKind = CsvFormEntry["component"];
@@ -216,15 +216,6 @@ export default function FormulaireIndex() {
         genericRef,
         currentCsvKey: currentCsvForm?.key,
       });
-
-    console.log(
-      "PDF PAYLOAD",
-      payload.generics.map(g => ({
-        label: g.label,
-        reperage: g.summary.report.reperage,
-        proposition: g.summary.report.proposition,
-      }))
-    );
 
     await generateGeriatriePdf(payload);
   }

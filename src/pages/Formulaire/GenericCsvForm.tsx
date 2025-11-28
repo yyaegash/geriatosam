@@ -242,7 +242,12 @@ export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsv
       rows.push({ question: q.label, answer: String(v) });
     });
 
-    return { kind: "generic", rows };
+    return {
+      kind: "generic",
+      score: 0,
+      color: "grey" as const,
+      report: { reperage: [], proposition: [] },
+    };
   };
 
   const clearLocal = () => {

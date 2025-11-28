@@ -6,8 +6,8 @@ import type {
   GenericSummary,
 } from "./GenericCsvForm";
 import { CSV_VULNERABILITY_FORMS } from "./GeriatricAssessment/Vulnerability";
-import { reconstructGenericFromCsv } from "./exportGeriatricPdf";
-import type { PdfPayload } from "./exportGeriatricPdf";
+import { reconstructGenericFromCsv } from "./ExportGeriatricPdf";
+import type { PdfPayload } from "./ExportGeriatricPdf";
 
 // Helpers pour normaliser les labels comme dans exportGeriatricPdf
 const stripDiacritics = (s: string) =>
