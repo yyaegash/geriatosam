@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useMemo, useState } from "react"
 import Papa from "papaparse";
 import { QuestionField } from "@/components/QuestionField";
 
-export type DependanceSummary = {
+export type DependenceSummary = {
   adlScore: number;
   adlMax: number;
   iadlScore: number;
@@ -10,8 +10,8 @@ export type DependanceSummary = {
   report: { reperage: string[]; proposition: string[] };
 };
 
-export type DependanceHandle = {
-  buildSummary: () => DependanceSummary;
+export type DependenceHandle = {
+  buildSummary: () => DependenceSummary;
   clearLocal: () => void;
 };
 
@@ -81,7 +81,7 @@ function getEffectiveAnswer(q: Q, val?: string): string | undefined {
   return undefined;
 }
 
-export default React.forwardRef<DependanceHandle, { csvPath?: string }>(function DependanceCsv(
+export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function DependenceCsv(
   { csvPath = "/dependance.csv" },
   ref
 ) {
@@ -143,7 +143,7 @@ export default React.forwardRef<DependanceHandle, { csvPath?: string }>(function
   };
 
   // Calcul des scores + rapport
-  const buildSummary = (): DependanceSummary => {
+  const buildSummary = (): DependenceSummary => {
     let adlPenalty = 0;   // à soustraire de 6
     let iadlPenalty = 0;  // à soustraire de 8
 

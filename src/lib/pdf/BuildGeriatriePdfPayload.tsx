@@ -1,11 +1,7 @@
-// src/pages/Formulaire/buildGeriatriePdfPayload.ts
-import type { AideEnPlaceHandle, SummaryRow } from "./AideEnPlaceCsv";
-import type { DependanceHandle, DependanceSummary } from "./DependanceCsv";
-import type {
-  GenericCsvFormHandle,
-  GenericSummary,
-} from "./GenericCsvForm";
-import { CSV_VULNERABILITY_FORMS } from "./GeriatricAssessment/Vulnerability";
+import type { AideEnPlaceHandle, SummaryRow } from "../../pages/Forms/Questions/AideEnPlaceCsv";
+import type { DependenceHandle, DependenceSummary } from "../../pages/Forms/Questions/DependenceCsv";
+import type { GenericCsvFormHandle, GenericSummary } from "../../pages/Forms/Questions/GenericCsvForm";
+import { CSV_VULNERABILITY_FORMS } from "../../pages/Forms/GeriatricAssessment/Vulnerability";
 import { reconstructGenericFromCsv } from "./ExportGeriatricPdf";
 import type { PdfPayload } from "./ExportGeriatricPdf";
 
@@ -18,12 +14,12 @@ const norm = (s: string) =>
 
 type Handles = {
   aideRef: React.RefObject<AideEnPlaceHandle | null>;
-  depRef: React.RefObject<DependanceHandle | null>;
+  depRef: React.RefObject<DependenceHandle | null>;
   genericRef: React.RefObject<GenericCsvFormHandle | null>;
-  currentCsvKey?: string; // <- juste la key de l’entrée active
+  currentCsvKey?: string;
 };
 
-export async function buildGeriatriePdfPayload({
+export async function BuildGeriatriePdfPayload({
   aideRef,
   depRef,
   genericRef,
@@ -36,7 +32,7 @@ export async function buildGeriatriePdfPayload({
     : undefined;
 
   // 2) Dépendance
-  const dep = (depRef.current?.buildSummary?.() || null) as DependanceSummary | null;
+  const dep = (depRef.current?.buildSummary?.() || null) as DependenceSummary | null;
 
   // 3) Tous les GenericCsvForm (mode "generic")
   const genericPayload: Array<{ label: string; summary: GenericSummary }> = [];
@@ -78,27 +74,9 @@ export async function buildGeriatriePdfPayload({
     }
   }
 
-  // (optionnel) log de debug
-  console.log(
-    "=== PAYLOAD PDF (buildGeriatriePdfPayload) ===",
-    JSON.stringify(
-      {
-        dependance: dep,
-        generics: genericPayload.map((g) => ({
-          label: g.label,
-          score: g.summary.score,
-          reperage: g.summary.report.reperage,
-          proposition: g.summary.report.proposition,
-        })),
-      },
-      null,
-      2
-    )
-  );
-
   return {
     aide: aidePayload,
-    dependance: dep,
+    dependence: dep,
     generics: genericPayload,
   };
 }

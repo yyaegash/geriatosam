@@ -1,15 +1,14 @@
-import type { SummaryRow } from "./AideEnPlaceCsv";
-import type { DependanceSummary } from "./DependanceCsv";
-import type { GenericSummary } from "./GenericCsvForm";
+import type { SummaryRow } from "../../pages/Forms/Questions/AideEnPlaceCsv";
+import type { DependenceSummary } from "../../pages/Forms/Questions/DependenceCsv";
+import type { GenericSummary } from "../../pages/Forms/Questions/GenericCsvForm";
 
-/** Couleurs d’histogramme */
 export type HistoColor = "green" | "orange" | "red" | "grey" | "black";
 export type HistoBar = { label: string; valuePct: number; color: HistoColor };
 
 /** Données d’entrée de la génération PDF */
 export type PdfPayload = {
   aide?: { rows: SummaryRow[] };                 // Aide en place -> Q/R listées (à gauche)
-  dependance?: DependanceSummary | null;         // Dépendance -> repérage/proposition + barres ADL/IADL
+  dependence?: DependenceSummary | null;         // Dépendence -> repérage/proposition + barres ADL/IADL
   generics: Array<{ label: string; summary: GenericSummary }>; // Tous les GenericCsvForm (mode "generic")
   extraHistos?: HistoBar[];                      // Barres additionnelles si besoin
 };
@@ -317,8 +316,8 @@ export async function generateGeriatriePdf(payload: PdfPayload) {
   }
 
   /* ==================== Dépendance ==================== */
-  if (payload.dependance) {
-    const dep = payload.dependance;
+  if (payload.dependence) {
+    const dep = payload.dependence;
     const hasText =
       (dep.report.reperage && dep.report.reperage.length > 0) ||
       (dep.report.proposition && dep.report.proposition.length > 0);

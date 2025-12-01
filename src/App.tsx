@@ -4,10 +4,8 @@ import { useEffect } from "react";
 
 import Header from "./components/Header";
 import Presentation from "./pages/Presentation";
-import FormulaireIndex from "./pages/Formulaire/Index";
-import PriseEnCharge from "./pages/PriseEnCharge";
-import EnVille from "./pages/EnVille";
-import References from "./pages/References";
+import FormulaireIndex from "./pages/Forms/Index";
+import ConsultationAssistance from "./pages/ConsultationAssistance";
 
 export default function App() {
   const location = useLocation();
@@ -35,9 +33,7 @@ export default function App() {
             <Routes location={location}>
               <Route path="/" element={<Presentation />} />
               <Route path="/formulaire/*" element={<FormulaireIndex />} />
-              <Route path="/prise-en-charge" element={<PriseEnCharge />} />
-              <Route path="/en-ville" element={<EnVille />} />
-              <Route path="/references" element={<References />} />
+              <Route path="/aide-a-la-consulation" element={<ConsultationAssistance />} />
             </Routes>
           </motion.div>
         </AnimatePresence>

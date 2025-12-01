@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function EnVille() {
+export default function ConsultationAssistance() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -8,10 +8,10 @@ export default function EnVille() {
       transition={{ duration: 0.3 }}
       className="mx-auto max-w-4xl p-8"
     >
-      <h2 className="text-xl font-semibold mb-3">Prise en charge en ville</h2>
+      <h2 className="text-xl font-semibold mb-3">Aide à la prise en charge</h2>
       <p className="text-gray-600 text-sm leading-relaxed">
-        Informations et orientations destinées à la coordination entre les soins
-        hospitaliers et les intervenants à domicile.
+        Cette section contiendra les recommandations et les protocoles relatifs
+        à la prise en charge gériatrique en établissement.
       </p>
     </motion.div>
   );
