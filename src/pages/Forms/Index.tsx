@@ -62,11 +62,15 @@ export default function FormulaireIndex() {
   const [resultsAide, setResultsAide] = useState<{ freq: SummaryRow[]; other: SummaryRow[] } | null>(null);
   const [resultsDep, setResultsDep] = useState<DependenceSummary | null>(null);
   const [resultsGeneric, setResultsGeneric] = useState<GenericSummary | null>(null);
+  const [buttonsHidden, setButtonsHidden] = useState(false);
 
   /* ===================== PREVIEW ===================== */
 
   function handlePreview() {
     if (!currentCsvForm) return;
+
+    // Cacher les boutons quand on ouvre la preview
+    setButtonsHidden(true);
 
     switch (currentCsvForm.component as ComponentKind) {
       case "aide": {
@@ -107,6 +111,39 @@ export default function FormulaireIndex() {
     setResultsAide(null);
     setResultsDep(null);
     setResultsGeneric(null);
+  }
+
+  /* ===================== OVERLAY CLOSE HANDLERS ===================== */
+
+  function handleCloseAideOverlay() {
+    setResultsAide(null);
+    setButtonsHidden(false); // Réafficher les boutons
+  }
+
+  function handleCloseDepOverlay() {
+    setResultsDep(null);
+    setButtonsHidden(false); // Réafficher les boutons
+  }
+
+  function handleCloseGenericOverlay() {
+    setResultsGeneric(null);
+    setButtonsHidden(false); // Réafficher les boutons
+  }
+
+  function handleValidateAndClearAide() {
+    handleConfirmAndClearAll();
+    setButtonsHidden(false); // Réafficher les boutons
+  }
+
+  function handleValidateAndClearDep() {
+    depRef.current?.clearLocal?.(); // Effacer les données du formulaire
+    setResultsDep(null);
+    setButtonsHidden(false); // Réafficher les boutons
+  }
+
+  function handleValidateAndClearGeneric() {
+    handleConfirmAndClearAll();
+    setButtonsHidden(false); // Réafficher les boutons
   }
 
   /* ===================== RENDER FORM ===================== */
@@ -186,6 +223,7 @@ export default function FormulaireIndex() {
               onValidate={handleValidateAll}
               submitLabel="Preview"
               validateLabel="Valider"
+              hidden={buttonsHidden}
             />
           </section>
         </div>
@@ -221,6 +259,7 @@ export default function FormulaireIndex() {
               onValidate={handleValidateAll}
               submitLabel="Preview"
               validateLabel="Valider"
+              hidden={buttonsHidden}
             />
           </section>
         </>
@@ -228,21 +267,21 @@ export default function FormulaireIndex() {
 
       <HelpOverlay
         results={resultsAide}
-        onClose={() => setResultsAide(null)}
-        onValidate={handleConfirmAndClearAll}
+        onClose={handleCloseAideOverlay}
+        onValidate={handleValidateAndClearAide}
       />
 
       <DepOverlay
         results={resultsDep}
-        onClose={() => setResultsDep(null)}
-        onValidate={() => setResultsDep(null)}
+        onClose={handleCloseDepOverlay}
+        onValidate={handleValidateAndClearDep}
       />
 
       <GenericCsvOverlay
         results={resultsGeneric}
         currentCsvForm={currentCsvForm}
-        onClose={() => setResultsGeneric(null)}
-        onValidate={handleConfirmAndClearAll}
+        onClose={handleCloseGenericOverlay}
+        onValidate={handleValidateAndClearGeneric}
       />
     </div>
   );

@@ -43,8 +43,14 @@ const GenericCsvOverlay: React.FC<GenericCsvOverlayProps> = ({
       : "#9ca3af";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
 
         {/* HEADER */}
         <div className="px-4 py-3 border-b">

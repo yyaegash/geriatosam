@@ -3,7 +3,7 @@ import React, { useId } from "react";
 interface QuestionDef {
   id: string;
   label: string;
-  type: "text" | "textarea" | "radio" | "checkbox";
+  type: "text" | "textarea" | "radio" | "checkbox" | "information";
   options?: string[];
   placeholder?: string;
   freq?: boolean;
@@ -118,6 +118,14 @@ export function QuestionField({ def, value, onChange, disabled }: Props) {
           ))}
         </div>
       </fieldset>
+    );
+  }
+
+  if (def.type === "information") {
+    return (
+      <div>
+        <h3 className="text-base font-semibold mb-3">{def.label}</h3>
+      </div>
     );
   }
 

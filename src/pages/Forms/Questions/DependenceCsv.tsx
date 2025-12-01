@@ -7,6 +7,8 @@ export type DependenceSummary = {
   adlMax: number;
   iadlScore: number;
   iadlMax: number;
+  dependanceScore: number; // Nouveau score unifié pour l'histogramme (0-100%)
+  color: "green" | "orange" | "red" | "grey"; // Couleur basée sur "Qualité de la prise en charge actuelle"
   report: { reperage: string[]; proposition: string[] };
 };
 
@@ -22,7 +24,7 @@ type CsvRow = {
   Question: string;
   Type?: string;         // radio | ...
   Options?: string;      // ex ADL: "Aide partielle:0,5|Dépendant:1" ; IADL: "Oui|Non" etc.
-  Role?: string;         // toléré mais pas nécessaire ici
+  Role?: string;         // "lock" pour désactiver le reste du formulaire
   TriggerReportOn?: string; // ex: "Aide partielle|Dépendant" (optionnel, ajoute au rapport)
   Surveillance?: string; // "|" ou sauts de ligne
   Actions?: string;
@@ -32,9 +34,11 @@ type Option = { label: string; score?: number };
 
 type Q = {
   id: string;
-  section: "ADL" | "IADL";
+  section: "Dépendance" | "ADL" | "IADL" | "";
   label: string;
-  type: "radio" | "checkbox" | "text" | "textarea";
+  type: "radio" | "checkbox" | "text" | "textarea" | "information";
+  qpos: number;
+  role?: string;                 // "lock" pour verrouiller le formulaire
   options: Option[];             // options affichées (sans "Non")
   rawOptions: Option[];          // options brutes (pour détecter Oui/Non caché)
   triggerReportOn: string[];     // labels qui déclenchent le rapport (en plus de Aide partielle/Dépendant)
@@ -81,6 +85,25 @@ function getEffectiveAnswer(q: Q, val?: string): string | undefined {
   return undefined;
 }
 
+/** Calcule la couleur de l'histogramme basée sur "Qualité de la prise en charge actuelle" */
+function calculateColor(questions: Q[], answers: Record<string, string>): "green" | "orange" | "red" | "grey" {
+  const qualityQuestion = questions.find((q) =>
+    norm(q.label) === norm("Qualité de la prise en charge actuelle")
+  );
+
+  if (qualityQuestion) {
+    const selected = getEffectiveAnswer(qualityQuestion, answers[qualityQuestion.id]);
+    if (selected) {
+      const vNorm = norm(selected);
+      if (vNorm === "bonne") return "green";
+      else if (vNorm === "partielle") return "orange";
+      else if (vNorm === "insuffisante") return "red";
+    }
+  }
+
+  return "grey";
+}
+
 export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function DependenceCsv(
   { csvPath = "/dependance.csv" },
   ref
@@ -101,23 +124,38 @@ export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function
 
         const filtered = rows
           .filter((r) =>
-            r && r.Question &&
-            [r.Group].some((x) => x && norm(String(x)) === norm(GROUP_NAME)) &&
-            [r.Section].some((x) => x && ["adl","iadl"].includes(norm(String(x))))
+            r && (r.Question || r.Type === "Information" || r.Options) &&
+            [r.Group].some((x) => x && norm(String(x)) === norm(GROUP_NAME))
           )
           .sort((a, b) => Number(a.QPos || 0) - Number(b.QPos || 0));
 
         const qs: Q[] = filtered.map((r) => {
           const pos = Number(r.QPos || 0);
-          const section = (String(r.Section).toUpperCase() === "IADL" ? "IADL" : "ADL") as "ADL" | "IADL";
+          const sectionRaw = String(r.Section || "").trim();
+          let section: Q["section"] = "";
+
+          if (sectionRaw.toUpperCase() === "ADL") {
+            section = "ADL";
+          } else if (sectionRaw.toUpperCase() === "IADL") {
+            section = "IADL";
+          } else if (sectionRaw === "Dépendance") {
+            section = "Dépendance";
+          }
+
           const type = (r.Type || "radio").toLowerCase() as Q["type"];
           const { shown, raw } = parseChoices(r.Options, /*hideNon*/ true);
           const triggerReportOn = parseList(r.TriggerReportOn);
+
+          // Générer le label de la question
+          let questionLabel = r.Question ? r.Question.trim() : "";
+
           return {
-            id: normalizeId(section, r.Question.trim(), pos),
+            id: normalizeId(section || "unknown", questionLabel, pos),
             section,
-            label: r.Question.trim(),
-            type: (["radio", "checkbox", "text", "textarea"] as const).includes(type) ? type : "radio",
+            qpos: pos,
+            label: questionLabel,
+            type: (["radio", "checkbox", "text", "textarea", "information"] as const).includes(type) ? type : "radio",
+            role: r.Role,
             options: shown,
             rawOptions: raw,
             triggerReportOn,
@@ -150,45 +188,96 @@ export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function
     const reperageSet = new Set<string>();
     const propositionSet = new Set<string>();
 
+    // Vérifier si la question "lock" est cochée "Oui"
+    const lockQuestion = questions.find((q) => q.role === "lock");
+    const isFormLocked = lockQuestion && answers[lockQuestion.id] &&
+                        norm(answers[lockQuestion.id]) === "oui";
+
     questions.forEach((q) => {
       const selected = getEffectiveAnswer(q, answers[q.id]); // "Non" implicite si binaire & non coché
 
-      // ==== ADL : Aide partielle => 0.5 ; Dépendant => 1
-      if (q.section === "ADL" && selected) {
-        const lab = norm(selected);
-        if (lab === "aide partielle") adlPenalty += 0.5;
-        else if (lab === "dépendant" || lab === "dependant") adlPenalty += 1;
-      }
+      // *** Si formulaire verrouillé ("À revoir" cochée), ne pas calculer les scores ***
+      if (!isFormLocked) {
+        // ==== ADL : Aide partielle => 0.5 ; Dépendant => 1
+        if (q.section === "ADL" && selected) {
+          const lab = norm(selected);
+          if (lab === "aide partielle") adlPenalty += 0.5;
+          else if (lab === "dépendant" || lab === "dependant") adlPenalty += 1;
+        }
 
-      // ==== IADL : perd 1 point à chaque réponse COCHÉE (on ne pénalise pas le "Non" implicite)
-      if (q.section === "IADL") {
-        const selectedRaw = answers[q.id]; // uniquement si l'utilisateur a effectivement coché
-        if (selectedRaw && selectedRaw.trim()) {
-          // une sélection utilisateur -> -1
-          iadlPenalty += 1;
+        // ==== IADL : nouvelles méthodes - utilise les scores directs des options
+        if (q.section === "IADL" && selected) {
+          const selectedOption = q.rawOptions.find((opt) => norm(opt.label) === norm(selected));
+          if (selectedOption && selectedOption.score !== undefined) {
+            iadlPenalty += selectedOption.score;
+          }
         }
       }
 
-      // ==== Rapport : si (Aide partielle | Dépendant) OU si TriggerReportOn contient la réponse
-      const triggerHit =
-        (selected && ["aide partielle", "dependant", "dépendant"].includes(norm(selected))) ||
-        (selected && q.triggerReportOn.length > 0 && q.triggerReportOn.some((t) => norm(t) === norm(selected))) ||
-        q.triggerReportOn.includes("*");
+      // ==== Rapport : détermine si la réponse déclenche l'ajout au rapport
+      let triggerHit = false;
 
+      // Pour toutes les sections : si TriggerReportOn contient la réponse sélectionnée
+      if (selected && q.triggerReportOn.length > 0) {
+        triggerHit = q.triggerReportOn.some((t) => norm(t) === norm(selected));
+      }
+
+      // Cas spécial pour ADL : Aide partielle/Dépendant déclenche automatiquement
+      if (q.section === "ADL" && selected) {
+        const lab = norm(selected);
+        if (["aide partielle", "dependant", "dépendant"].includes(lab)) {
+          triggerHit = true;
+        }
+      }
+
+      // Trigger universel avec "*"
+      if (q.triggerReportOn.includes("*")) {
+        triggerHit = true;
+      }
+
+      // *** NOUVELLE LOGIQUE : Si formulaire verrouillé, seule la question "lock" contribue au rapport ***
       if (triggerHit) {
-        q.surveillanceItems.forEach((s) => reperageSet.add(s));
-        q.actionItems.forEach((a) => propositionSet.add(a));
+        if (isFormLocked) {
+          // Formulaire verrouillé : seule la question "lock" ajoute ses surveillances/actions
+          if (q.role === "lock") {
+            q.surveillanceItems.forEach((s) => reperageSet.add(s));
+            q.actionItems.forEach((a) => propositionSet.add(a));
+          }
+          // Les autres questions n'ajoutent rien au rapport
+        } else {
+          // Formulaire normal : toutes les questions peuvent ajouter au rapport
+          q.surveillanceItems.forEach((s) => reperageSet.add(s));
+          q.actionItems.forEach((a) => propositionSet.add(a));
+        }
       }
     });
 
     const adlScore = Math.max(0, Math.min(ADL_MAX, ADL_MAX - adlPenalty));
     const iadlScore = Math.max(0, Math.min(IADL_MAX, IADL_MAX - iadlPenalty));
 
+    // ==== NOUVEAU CALCUL : Score de dépendance unifié pour l'histogramme ====
+    let dependanceScore = 0;
+
+    // Si ADL ≤ 5,5 alors 50%
+    if (adlScore <= 5.5) {
+      dependanceScore = 50;
+    }
+
+    // Si ADL ≤ 5 ET IADL ≤ 6 alors 100%
+    if (adlScore <= 5 && iadlScore <= 6) {
+      dependanceScore = 100;
+    }
+
+    // ==== COULEUR : basée sur "Qualité de la prise en charge actuelle" ====
+    const color = calculateColor(questions, answers);
+
     return {
       adlScore,
       adlMax: ADL_MAX,
       iadlScore,
       iadlMax: IADL_MAX,
+      dependanceScore,
+      color,
       report: {
         reperage: Array.from(reperageSet),
         proposition: Array.from(propositionSet),
@@ -203,45 +292,26 @@ export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function
 
   useImperativeHandle(ref, () => ({ buildSummary, clearLocal }), [questions, answers]);
 
-  // Rendu : deux blocs (ADL / IADL) sur une même page — SANS “(max X)” dans le titre
-  const adlQs = questions.filter((q) => q.section === "ADL");
-  const iadlQs = questions.filter((q) => q.section === "IADL");
-
   const content = useMemo(() => {
     if (!questions.length) return <p className="text-gray-500 text-sm">Chargement du formulaire…</p>;
-    return (
-      <div className="space-y-8">
-        {adlQs.length > 0 && (
-          <div>
-            <h3 className="text-base font-semibold mb-2">ADL</h3>
-            <div className="space-y-4">
-              {adlQs.map((q) => (
-                <QuestionField
-                  key={q.id}
-                  def={{ id: q.id, label: q.label, type: q.type, options: q.options.map((o) => o.label) }}
-                  value={answers[q.id]}
-                  onChange={setAnswer}
-                />
-              ))}
-            </div>
-          </div>
-        )}
 
-        {iadlQs.length > 0 && (
-          <div>
-            <h3 className="text-base font-semibold mb-2">IADL</h3>
-            <div className="space-y-4">
-              {iadlQs.map((q) => (
-                <QuestionField
-                  key={q.id}
-                  def={{ id: q.id, label: q.label, type: q.type, options: q.options.map((o) => o.label) }}
-                  value={answers[q.id]}
-                  onChange={setAnswer}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+    // Trier par position et déterminer l'état de verrouillage
+    const sortedQuestions = [...questions].sort((a, b) => a.qpos - b.qpos);
+    const lockQuestion = questions.find((q) => q.role === "lock");
+    const isFormLocked = lockQuestion && answers[lockQuestion.id] &&
+                        norm(answers[lockQuestion.id]) === "oui";
+
+    return (
+      <div className="space-y-4">
+        {sortedQuestions.map((q) => (
+          <QuestionField
+            key={q.id}
+            def={{ id: q.id, label: q.label, type: q.type, options: q.options.map((o) => o.label) }}
+            value={answers[q.id]}
+            onChange={setAnswer}
+            disabled={isFormLocked && q.role !== "lock"}
+          />
+        ))}
       </div>
     );
   }, [questions, answers]);

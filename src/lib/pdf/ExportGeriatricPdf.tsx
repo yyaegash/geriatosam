@@ -306,14 +306,31 @@ export async function generateGeriatriePdf(payload: PdfPayload) {
 
     if (answeredRows.length) {
       sectionTitle("Aide en place et fréquence");
-      sectionHeader("Repérage gériatrique", "Proposition de prise en charge");
-      const left = answeredRows.map(
-        (r) => `${r.question} : ${String(r.answer).trim()}`
-      );
-      const right: string[] = [];
-      bulletsTwoCols(left, right);
+      // Pas d'en-têtes de colonnes pour cette section
+
+      // Afficher chaque question-réponse avec des puces simples
+      for (const row of answeredRows) {
+        const text = `${row.question} : ${String(row.answer).trim()}`;
+        const lines = getLines(text);
+        const rowHeight = getTextHeight(lines);
+
+        ensureSpace(rowHeight + 8);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("•", marginX, y + 14);
+        doc.setFontSize(10);
+        doc.text(lines, marginX + 10, y + 14);
+
+        y += rowHeight + 8;
+      }
+
+      y += 8; // espace supplémentaire après la section
     }
   }
+
+  // Espace entre formulaires
+  y += 16;
 
   /* ==================== Dépendance ==================== */
   if (payload.dependence) {
@@ -339,28 +356,25 @@ export async function generateGeriatriePdf(payload: PdfPayload) {
       bulletsTwoCols(dep.report.reperage || [], dep.report.proposition || []);
     }
 
-    // Histogrammes ADL/IADL (barres noires) uniquement si les scores sont valides
-    if (hasScores) {
-      const adlPct = Math.max(
-        0,
-        Math.min(100, Math.round((dep.adlScore / dep.adlMax) * 100))
-      );
-      const iadlPct = Math.max(
-        0,
-        Math.min(100, Math.round((dep.iadlScore / dep.iadlMax) * 100))
-      );
-
-      if (adlPct > 0) {
-        histos.push({ label: "ADL", valuePct: adlPct, color: "black" });
-      }
-      if (iadlPct > 0) {
-        histos.push({ label: "IADL", valuePct: iadlPct, color: "black" });
-      }
+    // Histogramme de dépendance unifié (remplace les barres ADL/IADL séparées)
+    if (hasScores && dep.dependanceScore > 0) {
+      histos.push({
+        label: "Dépendance",
+        valuePct: dep.dependanceScore,
+        color: dep.color
+      });
     }
   }
 
+  // Espace entre formulaires
+  y += 16;
+
   /* ============= Formulaires génériques ============= */
-  for (const g of payload.generics) {
+  for (const [index, g] of payload.generics.entries()) {
+    // Ajouter de l'espace entre chaque formulaire générique (sauf le premier)
+    if (index > 0) {
+      y += 12;
+    }
     const rep = g.summary.report?.reperage || [];
     const prop = g.summary.report?.proposition || [];
 

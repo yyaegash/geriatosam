@@ -6,6 +6,7 @@ type Props = {
   anchorRef?: React.RefObject<HTMLElement>; // non obligatoire, conservé pour compat
   submitLabel?: string;
   validateLabel?: string;
+  hidden?: boolean;          // contrôle la visibilité des boutons
 };
 
 export function SubmitBar({
@@ -14,9 +15,12 @@ export function SubmitBar({
   anchorRef, // non utilisé activement, gardé pour compat future
   submitLabel = "Preview",
   validateLabel = "Valider",
+  hidden = false,
 }: Props) {
   // Si un jour tu veux conditionner la largeur à anchorRef, tu peux le faire ici.
   const hasValidate = useMemo(() => typeof onValidate === "function", [onValidate]);
+
+  if (hidden) return null;
 
   return (
     <div
