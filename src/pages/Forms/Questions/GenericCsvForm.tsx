@@ -37,6 +37,7 @@ type CsvRow = {
   TriggerReportOn?: string; // valeurs qui déclenchent un ajout au rapport (ex: "Oui") ; "*" = tout
   Surveillance?: string;   // lignes à ajouter à la colonne Repérage
   Actions?: string;        // lignes à ajouter à la colonne Proposition
+  Tooltip?: string;        // tooltip explicatif pour la question (| = retour à la ligne)
 };
 
 type Option = { label: string; score?: number };
@@ -50,6 +51,7 @@ type Question = {
   triggerOnReport: string[];     // valeurs déclenchant l'ajout au rapport (peut être ["*"])
   surveillanceItems: string[];   // éléments Repérage
   actionItems: string[];         // éléments Proposition
+  tooltip?: string;              // tooltip explicatif (| convertis en retours à la ligne)
 };
 
 type Props = {
@@ -149,6 +151,7 @@ export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsv
             triggerOnReport,
             surveillanceItems: parseList(r.Surveillance),
             actionItems: parseList(r.Actions),
+            tooltip: r.Tooltip?.trim() || undefined,
           };
         });
 
@@ -268,7 +271,13 @@ export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsv
           return (
             <div key={q.id} className={isDisabled ? "opacity-50 pointer-events-none select-none" : ""} aria-disabled={isDisabled}>
               <QuestionField
-                def={{ id: q.id, label: q.label, type: q.type, options: q.options.map((o) => o.label) }}
+                def={{
+                  id: q.id,
+                  label: q.label,
+                  type: q.type,
+                  options: q.options.map((o) => o.label),
+                  tooltip: q.tooltip
+                }}
                 value={answers[q.id]}
                 onChange={setAnswer}
               />

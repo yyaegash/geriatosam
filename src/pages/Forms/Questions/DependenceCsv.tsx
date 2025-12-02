@@ -28,6 +28,7 @@ type CsvRow = {
   TriggerReportOn?: string; // ex: "Aide partielle|Dépendant" (optionnel, ajoute au rapport)
   Surveillance?: string; // "|" ou sauts de ligne
   Actions?: string;
+  Tooltip?: string;      // tooltip explicatif pour la question (| = retour à la ligne)
 };
 
 type Option = { label: string; score?: number };
@@ -44,6 +45,7 @@ type Q = {
   triggerReportOn: string[];     // labels qui déclenchent le rapport (en plus de Aide partielle/Dépendant)
   surveillanceItems: string[];
   actionItems: string[];
+  tooltip?: string;              // tooltip explicatif (| convertis en retours à la ligne)
 };
 
 const STORAGE_KEY = "geriatrie_dependance_simpleplus_v1";
@@ -161,6 +163,7 @@ export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function
             triggerReportOn,
             surveillanceItems: parseList(r.Surveillance),
             actionItems: parseList(r.Actions),
+            tooltip: r.Tooltip?.trim() || undefined,
           };
         });
 
@@ -306,10 +309,16 @@ export default React.forwardRef<DependenceHandle, { csvPath?: string }>(function
         {sortedQuestions.map((q) => (
           <QuestionField
             key={q.id}
-            def={{ id: q.id, label: q.label, type: q.type, options: q.options.map((o) => o.label) }}
+            def={{
+              id: q.id,
+              label: q.label,
+              type: q.type,
+              options: q.options.map((o) => o.label),
+              tooltip: q.tooltip
+            }}
             value={answers[q.id]}
             onChange={setAnswer}
-            disabled={isFormLocked && q.role !== "lock"}
+            disabled={!!isFormLocked && q.role !== "lock"}
           />
         ))}
       </div>
