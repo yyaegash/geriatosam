@@ -1,20 +1,8 @@
 import React from "react";
-
-export interface DepResults {
-  adlScore: number;
-  adlMax: number;
-  iadlScore: number;
-  iadlMax: number;
-  dependanceScore: number; // Nouveau score unifié pour l'histogramme (0-100%)
-  color: "green" | "orange" | "red" | "grey"; // Couleur basée sur "Qualité de la prise en charge actuelle"
-  report: {
-    reperage: string[];
-    proposition: string[];
-  };
-}
+import type { DependenceSummary } from "../Questions";
 
 interface DepOverlayProps {
-  results: DepResults | null;
+  results: DependenceSummary | null;
   onClose: () => void;
   onValidate: () => void;
 }
@@ -37,8 +25,8 @@ const DepOverlay: React.FC<DepOverlayProps> = ({ results, onClose, onValidate })
         </div>
 
         <div className="p-4 space-y-6">
-          {/* Histogramme de dépendance unifié (seulement si > 0) */}
-          {results.dependanceScore > 0 && (
+          {/* Histogramme de dépendance unifié */}
+          {(
             <div>
               <div className="flex items-center gap-3">
                 <div className="w-24 text-sm text-gray-600">Dépendance</div>

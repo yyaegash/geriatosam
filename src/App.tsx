@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import Header from "./components/Header";
 import Presentation from "./pages/Presentation";
-import FormulaireIndex from "./pages/Forms/Index";
+import GeriatricAssessment from "./pages/GeriatricAssessment";
 import ConsultationAssistance from "./pages/ConsultationAssistance";
 
 export default function App() {
@@ -32,7 +32,7 @@ export default function App() {
           >
             <Routes location={location}>
               <Route path="/" element={<Presentation />} />
-              <Route path="/formulaire/*" element={<FormulaireIndex />} />
+              <Route path="/formulaire/*" element={<GeriatricAssessment />} />
               <Route path="/aide-a-la-consulation" element={<ConsultationAssistance />} />
             </Routes>
           </motion.div>
