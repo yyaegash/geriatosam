@@ -157,15 +157,50 @@ export const CSV_MEDICAL_ISSUES_FORMS: FormConfig[] = [
    },
 ];
 
+export const CSV_SOCIAL_ENVIRONMENTAL_ISSUES: FormConfig[] = [
+  {
+     key: "doute_conduite",
+     label: "Doute sur l'aptitude à la conduite",
+     csvImport: () => import("@/assets/csv/socialEnvironmentalIssues/doute_conduite.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.doute_conduite.v1"
+  },
+  {
+     key: "epuisement_aidant",
+     label: "Doute sur épuisement de l'aidant",
+     csvImport: () => import("@/assets/csv/socialEnvironmentalIssues/epuisement_aidant.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.epuisement_aidant.v1"
+  },
+  {
+     key: "doute_maltraitance",
+     label: "Doute sur maltraitance",
+     csvImport: () => import("@/assets/csv/socialEnvironmentalIssues/doute_maltraitance.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.doute_maltraitance.v1"
+  },
+  {
+     key: "fin_de_vie",
+     label: "Choix de fin de vie à exprimer",
+     csvImport: () => import("@/assets/csv/socialEnvironmentalIssues/fin_de_vie.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.fin_de_vie.v1"
+  },
+];
+
 /**
  * Mappage des sections vers leurs formulaires
  */
 export const FORM_SECTIONS = {
   vulnerability: CSV_VULNERABILITY_FORMS,
   medicalIssues: CSV_MEDICAL_ISSUES_FORMS,
+  socialEnvironmentalIssues: CSV_SOCIAL_ENVIRONMENTAL_ISSUES,
 } as const;
 
 /**
  * Union de tous les formulaires pour le typage
  */
-export type AllFormConfigs = typeof CSV_VULNERABILITY_FORMS[number] | typeof CSV_MEDICAL_ISSUES_FORMS[number];
+export type AllFormConfigs =
+  typeof CSV_VULNERABILITY_FORMS[number] |
+  typeof CSV_MEDICAL_ISSUES_FORMS[number] |
+  typeof CSV_SOCIAL_ENVIRONMENTAL_ISSUES[number];

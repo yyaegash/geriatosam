@@ -74,8 +74,8 @@ export async function reconstructGenericFromCsv(
   config: FormConfig
 ): Promise<GenericSummary | null> {
   try {
-    const { label: sectionName, path: csvPath, storageKey, csvImport } = config;
-    const csvName = csvPath.replace(/^\//, '').replace(/\.csv$/, '');
+    const { label: sectionName, key, storageKey, csvImport } = config;
+    const csvName = key; // Use key as CSV name instead of extracting from path
     const sectionNorm = norm(sectionName).replace(/-/g, '_');
     const csvNorm = csvName.replace(/[^a-zA-Z0-9]/g, '_');
 
@@ -94,10 +94,11 @@ export async function reconstructGenericFromCsv(
 
     if (!answers || Object.keys(answers).length === 0) return null;
 
-    // Utiliser csvImport si disponible, sinon fetch
-    const text = csvImport
-      ? await csvImport()
-      : await fetch(csvPath, { cache: "no-store" }).then(response => response.text());
+    // Utiliser csvImport si disponible
+    if (!csvImport) {
+      throw new Error(`CSV import function not available for ${key}`);
+    }
+    const text = await csvImport();
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,

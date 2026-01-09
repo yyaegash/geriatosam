@@ -54,10 +54,11 @@ export type BaseQuestion = {
  * Configuration d'un formulaire CSV
  */
 export type FormConfig = {
-  csvPath: string;
+  key: string;
+  label: string;
+  csvImport?: () => Promise<string>;
+  component: string;
   storageKey: string;
-  sectionName?: string;
-  groupName?: string;
 };
 
 /**

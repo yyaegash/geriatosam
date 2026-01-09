@@ -1,0 +1,3 @@
+Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+Doute sur l'aptitude à la conduite;Doute sur l'aptitude à la conduite;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+Doute sur l'aptitude à la conduite;Doute sur l'aptitude à la conduite;2;"Affection médicale susceptible d’avoir des effets l’aptitude à la conduite chez un patient qui utilise sa voiture";radio;Oui:50|Non:0;;Oui;;"Obligation légale d’information du patient en lui indiquant qu’il lui revient de prendre rendez-vous avec un médecin agrée pour l’aptitude médicale à la conduite"

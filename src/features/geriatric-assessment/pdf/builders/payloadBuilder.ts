@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS } from "@/data/forms.config";
+import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, CSV_SOCIAL_ENVIRONMENTAL_ISSUES } from "@/data/forms.config";
 import { normalizeId } from "../../Questions/shared/utils";
 import { reconstructGenericFromCsv } from "./pdfBuilder";
 import type {
@@ -79,7 +79,6 @@ async function reconstructAideFromLocalStorage(): Promise<ReconstructedAideData 
   try {
     const AIDE_CONFIG = CSV_VULNERABILITY_FORMS.find(f => f.component === "aide")!;
     const SECTION_NAME = AIDE_CONFIG.label;
-    const csvPath = AIDE_CONFIG.path;
 
     const answers = tryGetFromStorage(
       AIDE_CONFIG.storageKey,
@@ -91,10 +90,11 @@ async function reconstructAideFromLocalStorage(): Promise<ReconstructedAideData 
       return null;
     }
 
-    // Utiliser csvImport si disponible, sinon fetch
-    const text = AIDE_CONFIG.csvImport
-      ? await AIDE_CONFIG.csvImport()
-      : await fetch(csvPath, { cache: "no-store" }).then(response => response.text());
+    // Utiliser csvImport si disponible
+    if (!AIDE_CONFIG.csvImport) {
+      throw new Error(`CSV import function not available for ${AIDE_CONFIG.key}`);
+    }
+    const text = await AIDE_CONFIG.csvImport();
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,
@@ -150,10 +150,11 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
   if (!answers || Object.keys(answers).length === 0) return null;
 
   try {
-    // Utiliser csvImport si disponible, sinon fetch
-    const text = DEP_CONFIG.csvImport
-      ? await DEP_CONFIG.csvImport()
-      : await fetch(DEP_CONFIG.path, { cache: "no-store" }).then(response => response.text());
+    // Utiliser csvImport si disponible
+    if (!DEP_CONFIG.csvImport) {
+      throw new Error(`CSV import function not available for ${DEP_CONFIG.key}`);
+    }
+    const text = await DEP_CONFIG.csvImport();
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,
@@ -299,10 +300,11 @@ export async function buildPdfPayload({
 
   const genericPayload: Array<{ label: string; summary: GenericSummary }> = [];
 
-  // Traiter les formulaires de vulnérabilité et de problèmes médicaux
+  // Traiter les formulaires de vulnérabilité, problèmes médicaux et sociaux-environnementaux
   const allGenericForms = [
     ...CSV_VULNERABILITY_FORMS.filter(f => f.component === "generic-generic"),
-    ...CSV_MEDICAL_ISSUES_FORMS.filter(f => f.component === "generic-generic")
+    ...CSV_MEDICAL_ISSUES_FORMS.filter(f => f.component === "generic-generic"),
+    ...CSV_SOCIAL_ENVIRONMENTAL_ISSUES.filter(f => f.component === "generic-generic")
   ];
 
   for (const entry of allGenericForms) {

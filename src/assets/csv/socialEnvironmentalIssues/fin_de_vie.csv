@@ -1,0 +1,4 @@
+Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+Choix de fin de vie à exprimer;Choix de fin de vie à exprimer;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+Choix de fin de vie à exprimer;Choix de fin de vie à exprimer;2;"Absence de directives anticipées rédigées";radio;Oui:50|Non:0;;Oui;Directives anticipées non rédigeée;"Proposer la rédaction des directives anticipées au patient. Lui expliquer les principaux enjeux. Lui proposer de les déposer dans le DMP."
+Choix de fin de vie à exprimer;Choix de fin de vie à exprimer;3;"Absence d’organisation des obsèques et de sa succession";radio;Oui:50|Non:0;;Oui;Absence d’organisation des obsèques et de sa succession;"Discuter du choix entre la crémation et l’inhumation à faire savoir à ses proches, des contrats d’assurance obsèques, du souhait au sujet du lieu où sera déposé la dépouille|Interroger sur le besoin d’organiser sa succession"

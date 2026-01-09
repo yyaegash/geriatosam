@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, type FormConfig } from "@/data/forms.config";
+import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, CSV_SOCIAL_ENVIRONMENTAL_ISSUES, type FormConfig } from "@/data/forms.config";
 
 /**
  * Hook personnalisé pour gérer la navigation entre sections et formulaires
@@ -18,13 +18,29 @@ export function useFormNavigation() {
 
   // Calculer les sous-onglets dynamiques selon la section
   const dynamicSubtabs = useMemo(() => {
+    console.log('🔍 Navigation - activeCategory:', activeCategory);
+    console.log('🔍 Navigation - normalizedCategory:', normalizedCategory);
+
     if (normalizedCategory.includes('fragilité') || normalizedCategory.includes('fragilit')) {
+      console.log('✅ Detected Fragilité section');
       return CSV_VULNERABILITY_FORMS.map((c) => c.label);
     } else if (normalizedCategory.includes('problèmes médicaux') ||
                normalizedCategory.includes('problemes medicaux') ||
                normalizedCategory.includes('medical')) {
+      console.log('✅ Detected Problèmes médicaux section');
       return CSV_MEDICAL_ISSUES_FORMS.map((c) => c.label);
+    } else if (normalizedCategory.includes('problèmes sociaux-environnementaux') ||
+               normalizedCategory.includes('problemes sociaux-environnementaux') ||
+               normalizedCategory.includes('problèmes sociaux-environementaux') ||
+               normalizedCategory.includes('problemes sociaux-environementaux') ||
+               normalizedCategory.includes('social') ||
+               normalizedCategory.includes('environnement') ||
+               normalizedCategory.includes('environement')) {
+      console.log('✅ Detected Problèmes sociaux-environnementaux section');
+      console.log('🔍 CSV_SOCIAL_ENVIRONMENTAL_ISSUES:', CSV_SOCIAL_ENVIRONMENTAL_ISSUES);
+      return CSV_SOCIAL_ENVIRONMENTAL_ISSUES.map((c) => c.label);
     } else {
+      console.log('❌ No section detected');
       return [];
     }
   }, [normalizedCategory]);
@@ -41,11 +57,18 @@ export function useFormNavigation() {
   const isProblemsMedicaux = normalizedCategory.includes('problèmes médicaux') ||
                             normalizedCategory.includes('problemes medicaux') ||
                             normalizedCategory.includes('medical');
-  const hasSubtabs = isFragilite || isProblemsMedicaux;
+  const isProblemsSociauxEnvironnementaux = normalizedCategory.includes('problèmes sociaux-environnementaux') ||
+                                           normalizedCategory.includes('problemes sociaux-environnementaux') ||
+                                           normalizedCategory.includes('problèmes sociaux-environementaux') ||
+                                           normalizedCategory.includes('problemes sociaux-environementaux') ||
+                                           normalizedCategory.includes('social') ||
+                                           normalizedCategory.includes('environnement') ||
+                                           normalizedCategory.includes('environement');
+  const hasSubtabs = isFragilite || isProblemsMedicaux || isProblemsSociauxEnvironnementaux;
 
   // Trouver le formulaire actuel
   const currentForm = useMemo<FormConfig | null>(() => {
-    const allForms = [...CSV_VULNERABILITY_FORMS, ...CSV_MEDICAL_ISSUES_FORMS];
+    const allForms = [...CSV_VULNERABILITY_FORMS, ...CSV_MEDICAL_ISSUES_FORMS, ...CSV_SOCIAL_ENVIRONMENTAL_ISSUES];
     return allForms.find((c) => c.label === activeFragTab) ?? null;
   }, [activeFragTab]);
 
@@ -59,6 +82,8 @@ export function useFormNavigation() {
       ? CSV_VULNERABILITY_FORMS.map((c) => c.label)
       : newCategory === "Problèmes médicaux"
       ? CSV_MEDICAL_ISSUES_FORMS.map((c) => c.label)
+      : (newCategory === "Problèmes sociaux-environnementaux" || newCategory === "Problèmes sociaux-environementaux")
+      ? CSV_SOCIAL_ENVIRONMENTAL_ISSUES.map((c) => c.label)
       : [];
 
     if (newSubtabs.length > 0) {
@@ -82,6 +107,7 @@ export function useFormNavigation() {
       activeFragTab,
       isFragilite,
       isProblemsMedicaux,
+      isProblemsSociauxEnvironnementaux,
       hasSubtabs,
       currentForm,
       dynamicSubtabs,

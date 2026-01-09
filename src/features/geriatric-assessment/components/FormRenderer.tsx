@@ -74,12 +74,7 @@ function renderFormByType(
       return <AideEnPlaceForm ref={refs.aideRef} />;
 
     case "dep":
-      return (
-        <DependenceForm
-          ref={refs.depRef}
-          csvPath={form.path}
-        />
-      );
+      return <DependenceForm ref={refs.depRef} />;
 
     case "generic-generic":
       return (
