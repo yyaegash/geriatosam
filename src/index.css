@@ -1,8 +1,235 @@
 @import "tailwindcss";
 @reference "tailwindcss";
 
-/* Utilitaires */
-.no-scrollbar::-webkit-scrollbar{ display:none; }
-.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+:root {
+  color-scheme: light;
 
-:root { color-scheme: light; }
+  /* Palette médicale professionnelle */
+  --color-medical-primary: #0369a1; /* Bleu médical professionnel */
+  --color-medical-primary-dark: #0284c7;
+  --color-medical-primary-light: #7dd3fc;
+  --color-medical-accent: #059669; /* Vert médical pour les validations */
+  --color-medical-accent-light: #10b981;
+  --color-medical-warning: #d97706; /* Orange pour les alertes */
+  --color-medical-danger: #dc2626; /* Rouge pour les urgences */
+  --color-medical-neutral: #64748b; /* Gris professionnel */
+  --color-medical-bg: #f8fafc; /* Arrière-plan légèrement teinté */
+  --color-medical-surface: #ffffff;
+  --color-medical-border: #e2e8f0;
+
+  /* Typographie */
+  --font-medical: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  font-family: var(--font-medical);
+  background-color: var(--color-medical-bg);
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+/* Utilitaires */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Animations douces */
+.smooth-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Conteneur principal avec ombres subtiles */
+.medical-container {
+  background: var(--color-medical-surface);
+  border: 1px solid var(--color-medical-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.medical-container:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Boutons médicaux */
+.btn-medical-primary {
+  background: linear-gradient(135deg, var(--color-medical-primary) 0%, var(--color-medical-primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(3, 105, 161, 0.2);
+}
+
+.btn-medical-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(3, 105, 161, 0.3);
+}
+
+.btn-medical-secondary {
+  background: var(--color-medical-surface);
+  color: var(--color-medical-primary);
+  border: 2px solid var(--color-medical-primary);
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-medical-secondary:hover {
+  background: var(--color-medical-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Headers avec gradient subtil */
+.medical-header {
+  background: linear-gradient(135deg, var(--color-medical-surface) 0%, #f1f5f9 100%);
+  border-bottom: 2px solid var(--color-medical-primary);
+  padding: 24px;
+  border-radius: 16px 16px 0 0;
+}
+
+/* Focus visible pour l'accessibilité */
+.medical-focus:focus-visible {
+  outline: 2px solid var(--color-medical-primary);
+  outline-offset: 2px;
+}
+
+/* Indicateurs de statut colorés */
+.status-success { color: var(--color-medical-accent); }
+.status-warning { color: var(--color-medical-warning); }
+.status-danger { color: var(--color-medical-danger); }
+
+/* Effets de glassmorphism subtils */
+.glass-effect {
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Animations d'entrée pour les formulaires */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+/* Effet de pulsation subtile pour les éléments importants */
+.pulse-medical {
+  animation: pulse-medical 2s infinite;
+}
+
+@keyframes pulse-medical {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(3, 105, 161, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(3, 105, 161, 0);
+  }
+}
+
+/* Dégradés de statut pour les indicateurs */
+.gradient-success {
+  background: linear-gradient(135deg, var(--color-medical-accent) 0%, var(--color-medical-accent-light) 100%);
+}
+
+.gradient-warning {
+  background: linear-gradient(135deg, var(--color-medical-warning) 0%, #f59e0b 100%);
+}
+
+.gradient-danger {
+  background: linear-gradient(135deg, var(--color-medical-danger) 0%, #ef4444 100%);
+}
+
+/* Améliorations pour les inputs et formulaires */
+.medical-input {
+  border: 2px solid var(--color-medical-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: var(--color-medical-surface);
+  transition: all 0.2s ease;
+  font-family: var(--font-medical);
+}
+
+.medical-input:focus {
+  outline: none;
+  border-color: var(--color-medical-primary);
+  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.1);
+}
+
+.medical-input:hover {
+  border-color: var(--color-medical-primary-light);
+}
+
+/* Amélioration des radios et checkboxes */
+.medical-radio,
+.medical-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-medical-border);
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.medical-checkbox {
+  border-radius: 6px;
+}
+
+.medical-radio:checked,
+.medical-checkbox:checked {
+  border-color: var(--color-medical-primary);
+  background: var(--color-medical-primary);
+}
+
+.medical-radio:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+
+.medical-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}

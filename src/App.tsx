@@ -16,7 +16,7 @@ export default function App() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-900">
+    <div className="min-h-screen flex flex-col text-gray-900" style={{ backgroundColor: 'var(--color-medical-bg)' }}>
       {/* Barre de navigation */}
       <Header />
 
@@ -39,9 +39,9 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Pied de page */}
-      <footer className="text-center text-xs text-gray-400 py-6 border-t">
-        © {new Date().getFullYear()} Outil gériatrique — Prototype visuel
+      {/* Pied de page médical */}
+      <footer className="text-center text-xs py-6 border-t medical-container mx-4 mb-4 rounded-2xl" style={{ borderColor: 'var(--color-medical-border)', color: 'var(--color-medical-neutral)' }}>
+        © {new Date().getFullYear()} Évaluation Gériatrique
       </footer>
     </div>
   );

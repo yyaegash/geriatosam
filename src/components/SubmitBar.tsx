@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { FileText, CheckCircle } from "lucide-react";
 
 type Props = {
   onSubmit: () => void;       // ouvre la preview du formulaire courant
@@ -30,35 +31,26 @@ export function SubmitBar({
     >
       {/* Conteneur fluide plein écran sur mobile, centré + max-w sur grands écrans */}
       <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 pb-3 pointer-events-none">
-        {/* Carte responsive : plein écran mobile, compacte desktop */}
-        <div
-          className="
+        {/* Carte responsive avec design médical */}
+        <div className="
             pointer-events-auto
             mx-0 sm:mx-auto
-            rounded-xl md:rounded-2xl
-            border bg-white/95 shadow-lg backdrop-blur
-            px-3 py-2 sm:px-4 sm:py-3
-            // Layout largeur :
+            medical-container
+            px-4 py-3 sm:px-6 sm:py-4
             w-full
             lg:w-auto lg:ml-auto
-            // Gestion de l'empilement des boutons :
-            flex flex-col gap-2
+            flex flex-col gap-3
             xs:flex-row xs:flex-wrap xs:justify-end
           "
+          style={{ background: 'rgba(248, 250, 252, 0.95)' }}
         >
           <button
             type="button"
             onClick={onSubmit}
-            className="
-              inline-flex items-center justify-center
-              rounded-lg border
-              px-4 py-2 text-sm font-medium
-              hover:bg-gray-50
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-black
-              w-full xs:w-auto
-            "
+            className="btn-medical-secondary medical-focus inline-flex items-center justify-center gap-2 w-full xs:w-auto"
             aria-label={submitLabel}
           >
+            <FileText className="w-4 h-4" />
             {submitLabel}
           </button>
 
@@ -66,16 +58,10 @@ export function SubmitBar({
             <button
               type="button"
               onClick={onValidate}
-              className="
-                inline-flex items-center justify-center
-                rounded-lg bg-black text-white
-                px-4 py-2 text-sm font-medium
-                hover:bg-gray-800
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-black
-                w-full xs:w-auto
-              "
+              className="btn-medical-primary medical-focus inline-flex items-center justify-center gap-2 w-full xs:w-auto"
               aria-label={validateLabel}
             >
+              <CheckCircle className="w-4 h-4" />
               {validateLabel}
             </button>
           )}

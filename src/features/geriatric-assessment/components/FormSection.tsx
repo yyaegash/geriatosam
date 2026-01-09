@@ -51,7 +51,7 @@ export function FormSection({
   const formPaneRef = useRef<HTMLElement>(null!);
 
   return (
-    <section ref={formPaneRef}>
+    <section ref={formPaneRef} className="medical-container smooth-transition">
       <FormRenderer
         currentForm={currentForm}
         title={title}

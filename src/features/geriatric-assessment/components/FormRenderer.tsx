@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { FileX } from "lucide-react";
 import type { FormConfig } from "@/data/forms.config";
 import {
   AideEnPlaceForm,
@@ -39,25 +40,41 @@ export function FormRenderer({
 }: FormRendererProps) {
   if (!currentForm) {
     return (
-      <div className="rounded-2xl border p-4 lg:p-6 shadow-sm">
-        <p className="text-gray-500 text-center">Aucun formulaire sélectionné</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="medical-container p-8 lg:p-12 text-center animate-fade-in-up"
+      >
+        <FileX className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+        <p className="text-gray-500 text-lg">Aucun formulaire sélectionné</p>
+        <p className="text-gray-400 text-sm mt-2">Choisissez une section pour commencer l'évaluation</p>
+      </motion.div>
     );
   }
 
   return (
     <motion.div
       key={animationKey}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-      className="rounded-2xl border p-4 lg:p-6 shadow-sm"
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.98 }}
+      transition={{
+        duration: 0.4,
+        ease: "easeOut"
+      }}
+      className="p-6 lg:p-8 animate-slide-in-right"
     >
-      <h2 className="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">
-        {title}
-      </h2>
+      <div className="flex items-center gap-3 mb-6 lg:mb-8">
+        <div className="w-3 h-8 rounded-full bg-gradient-to-b from-blue-500 to-blue-600"></div>
+        <h2 className="text-xl lg:text-2xl font-bold text-slate-800">
+          {title}
+        </h2>
+      </div>
 
-      {renderFormByType(currentForm, refs)}
+      <div className="animate-fade-in-up">
+        {renderFormByType(currentForm, refs)}
+      </div>
     </motion.div>
   );
 }

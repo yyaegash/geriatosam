@@ -6,6 +6,7 @@ import { FormSection } from "./components/FormSection";
 import HelpOverlay from "./Results/HelpOverlay";
 import DepOverlay from "./Results/DepOverlay";
 import GenericCsvOverlay from "./Results/GenericOverlay";
+import { Activity } from "lucide-react";
 
 /**
  * Page principale des formulaires gériatriques
@@ -18,10 +19,28 @@ export default function FormulaireIndex() {
   const isMdUp = useIsMdUp();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
-      {isMdUp ? (
-        // Layout Desktop : 3 colonnes (sections, sous-sections, formulaire)
-        <div className="grid gap-4 md:grid-cols-[220px_220px_minmax(0,1fr)]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-medical-bg)' }}>
+      {/* Header médical professionnel */}
+      <header className="medical-header border-b-0 rounded-none mb-6">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <Activity className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Évaluation Gériatrique</h1>
+                <p className="text-sm text-slate-600">Système d'évaluation médicale complète</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 pb-6">
+        {isMdUp ? (
+          // Layout Desktop : 3 colonnes avec design médical
+          <div className="grid gap-6 md:grid-cols-[240px_240px_minmax(0,1fr)]">
           <NavigationSidebar
             activeCategory={navigation.state.activeCategory}
             onCategoryChange={navigation.actions.handleCategoryChange}
@@ -87,6 +106,7 @@ export default function FormulaireIndex() {
         onClose={formState.actions.handleCloseGenericOverlay}
         onValidate={formState.actions.handleValidateAndClearGeneric}
       />
+      </div>
     </div>
   );
 }
