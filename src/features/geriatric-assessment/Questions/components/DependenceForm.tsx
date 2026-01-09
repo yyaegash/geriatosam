@@ -27,11 +27,7 @@ export default React.forwardRef<DependenceHandle, Props>(function DependenceForm
   { csvPath = "/dependance.csv" },
   ref
 ) {
-  const { questions, answers, isLoading, setAnswer, clearLocal } = useCsvForm({
-    csvPath,
-    storageKey: STORAGE_KEY,
-    groupName: GROUP_NAME
-  });
+  const { questions, answers, isLoading, setAnswer, clearLocal } = useCsvForm(DEP_CONFIG);
 
   const isLocked = useFormLock(questions, answers);
 

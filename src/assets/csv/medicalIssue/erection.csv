@@ -1,0 +1,5 @@
+Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+Troubles de l'érection;Troubles de l'érection;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+Troubles de l'érection;Troubles de l'érection;2;"Trouble de l’érection fréquents affectant la possibilité d’avoir des rapports sexuels désirés satisfaisant";radio;Oui:50|Non:0;;Oui;;"Réaliser un bilan cardiovasculaire : la dysfonction érectile est un facteur prédictif d’athérosclérose. Traiter un diabète, limiter le tabac et l’alcool.|A la demande du patient : Adresser à l’urologue pour bilan étiologique complet, avant de discuter un traitement.|Prendre en compte les contre-indications aux IPDE-5 (dérivés nitrés associés) et les effets secondaires (bouffées vasomotrices), chez la personne âgée"
+Troubles de l'érection;Troubles de l'érection;3;Retentissement important;radio;Oui:100|Non:0;;;;
+Troubles de l'érection;Troubles de l'érection;4;Qualité de la prise en charge actuelle;radio;Bonne|Partielle|Insuffisante;color;;;

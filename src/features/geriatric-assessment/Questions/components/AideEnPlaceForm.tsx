@@ -26,11 +26,7 @@ export default React.forwardRef<AideEnPlaceHandle, Props>(function AideEnPlaceFo
   { csvPath = "/aide_en_place.csv" },
   ref
 ) {
-  const { questions, answers, isLoading, setAnswer, clearLocal } = useCsvForm({
-    csvPath,
-    storageKey: STORAGE_KEY,
-    sectionName: SECTION_NAME
-  });
+  const { questions, answers, isLoading, setAnswer, clearLocal } = useCsvForm(AIDE_CONFIG);
 
   const isLocked = useFormLock(questions, answers);
 

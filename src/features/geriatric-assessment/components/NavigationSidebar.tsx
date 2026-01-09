@@ -8,14 +8,17 @@ interface NavigationSidebarProps {
   /** Handler pour changer de catégorie */
   onCategoryChange: (category: string) => void;
 
-  /** Onglet de fragilité actif */
+  /** Onglet actif dans la section courante */
   activeFragTab: string;
 
-  /** Handler pour changer d'onglet fragilité */
+  /** Handler pour changer d'onglet dans la section courante */
   onFragTabChange: (tab: string) => void;
 
-  /** Liste des onglets de fragilité disponibles */
-  dynamicFragSubtabs: string[];
+  /** Liste des onglets disponibles pour la section courante */
+  dynamicSubtabs: string[];
+
+  /** Si la section courante a des sous-onglets */
+  hasSubtabs: boolean;
 
   /** Si c'est la vue mobile (stacked) */
   isMobile?: boolean;
@@ -30,10 +33,10 @@ export function NavigationSidebar({
   onCategoryChange,
   activeFragTab,
   onFragTabChange,
-  dynamicFragSubtabs,
+  dynamicSubtabs,
+  hasSubtabs,
   isMobile = false
 }: NavigationSidebarProps) {
-  const isFragilite = activeCategory === "Fragilité";
 
   if (isMobile) {
     return (
@@ -44,10 +47,10 @@ export function NavigationSidebar({
           active={activeCategory}
           onSelect={onCategoryChange}
         />
-        {isFragilite && (
+        {hasSubtabs && (
           <VerticalTabs
-            title="Fragilité — catégories"
-            items={[...dynamicFragSubtabs]}
+            title={`${activeCategory} — catégories`}
+            items={[...dynamicSubtabs]}
             active={activeFragTab}
             onSelect={onFragTabChange}
           />
@@ -68,14 +71,14 @@ export function NavigationSidebar({
         />
       </aside>
 
-      {/* Sous-sections Fragilité */}
+      {/* Sous-sections dynamiques */}
       <aside>
-        {isFragilite ? (
+        {hasSubtabs ? (
           <VerticalTabs
-            items={[...dynamicFragSubtabs]}
+            items={[...dynamicSubtabs]}
             active={activeFragTab}
             onSelect={onFragTabChange}
-            title="Fragilité — catégories"
+            title={`${activeCategory} — catégories`}
           />
         ) : (
           <div className="text-sm text-gray-500 px-1 pt-1">—</div>

@@ -76,8 +76,12 @@ export function useCsvForm(config: FormConfig) {
       savedAnswers = {};
     }
 
-    fetch(config.csvPath)
-      .then(response => response.text())
+    // Utiliser csvImport si disponible, sinon fetch
+    const csvPromise = config.csvImport
+      ? config.csvImport()
+      : fetch(config.csvPath).then(response => response.text());
+
+    csvPromise
       .then(csvText => {
         const delimiter = detectCsvDelimiter(csvText);
         const parsed = Papa.parse<CsvRow>(csvText, {
@@ -106,7 +110,7 @@ export function useCsvForm(config: FormConfig) {
           error: error.message
         }));
       });
-  }, [config.csvPath, config.sectionName, config.groupName, config.storageKey]);
+  }, [config.csvPath, config.csvImport, config.sectionName, config.groupName, config.storageKey]);
 
   return {
     ...state,

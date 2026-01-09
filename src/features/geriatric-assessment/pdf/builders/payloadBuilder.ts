@@ -1,6 +1,7 @@
 import Papa from "papaparse";
-import { CSV_VULNERABILITY_FORMS } from "@/data/forms.config";
+import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS } from "@/data/forms.config";
 import { normalizeId } from "../../Questions/shared/utils";
+import { reconstructGenericFromCsv } from "./pdfBuilder";
 import type {
   AideEnPlaceSummary,
   DependenceSummary,
@@ -90,9 +91,10 @@ async function reconstructAideFromLocalStorage(): Promise<ReconstructedAideData 
       return null;
     }
 
-    const response = await fetch(csvPath, { cache: "no-store" });
-    if (!response.ok) return null;
-    const text = await response.text();
+    // Utiliser csvImport si disponible, sinon fetch
+    const text = AIDE_CONFIG.csvImport
+      ? await AIDE_CONFIG.csvImport()
+      : await fetch(csvPath, { cache: "no-store" }).then(response => response.text());
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,
@@ -148,9 +150,10 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
   if (!answers || Object.keys(answers).length === 0) return null;
 
   try {
-    const response = await fetch(DEP_CONFIG.path, { cache: "no-store" });
-    if (!response.ok) return null;
-    const text = await response.text();
+    // Utiliser csvImport si disponible, sinon fetch
+    const text = DEP_CONFIG.csvImport
+      ? await DEP_CONFIG.csvImport()
+      : await fetch(DEP_CONFIG.path, { cache: "no-store" }).then(response => response.text());
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,
@@ -173,11 +176,22 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
       const questionNorm = norm(q.Question).replace(/[^a-z0-9]+/g, "-");
       const sectionNorm = norm(DEP_CONFIG.label);
 
+      const isADL = norm(q.Section) === norm("ADL") || q.Question.toLowerCase().includes("autonomie pour");
+      const isIADL = norm(q.Section) === norm("IADL") || ["téléphone", "courses", "repas", "ménage", "lessive", "transport", "médicament", "finance"]
+        .some(keyword => q.Question.toLowerCase().includes(keyword));
+
       const possibleIds = [
         `${sectionNorm}.${String(pos).padStart(2, "0")}.${questionNorm}`,
         `dependance.${String(pos).padStart(2, "0")}.${questionNorm}`,
         `csv.${sectionNorm}.${String(pos).padStart(2, "0")}.${questionNorm}`
       ];
+
+      if (isADL) {
+        possibleIds.push(`adl.${String(pos).padStart(2, "0")}.${questionNorm}`);
+      }
+      if (isIADL) {
+        possibleIds.push(`iadl.${String(pos).padStart(2, "0")}.${questionNorm}`);
+      }
 
       let val: string | undefined;
       for (const id of possibleIds) {
@@ -186,10 +200,6 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
       }
 
       if (!val || isNoAnswer(val)) return;
-
-      const isADL = q.Question.toLowerCase().includes("autonomie pour");
-      const isIADL = ["téléphone", "courses", "repas", "ménage", "lessive", "transport", "médicament", "finance"]
-        .some(keyword => q.Question.toLowerCase().includes(keyword));
 
       const choices = parseChoices(q.Options);
       const found = choices.find(ch => normLabel(ch.label) === normLabel(val));
@@ -201,10 +211,18 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
         }
       }
 
-      const surveillance = parseList(q.Surveillance);
-      surveillance.forEach(s => reperageSet.add(s.trim()));
-      const actions = parseList(q.Actions);
-      actions.forEach(a => propositionSet.add(a.trim()));
+      const triggerReportOn = q.TriggerReportOn ? parseList(q.TriggerReportOn) : [];
+      const shouldTrigger = triggerReportOn.length === 0 || triggerReportOn.some(trigger =>
+        normLabel(trigger) === normLabel(val)
+      );
+
+      if (shouldTrigger) {
+        const surveillance = parseList(q.Surveillance);
+        const actions = parseList(q.Actions);
+
+        surveillance.forEach(s => reperageSet.add(s.trim()));
+        actions.forEach(a => propositionSet.add(a.trim()));
+      }
     });
 
     const ADL_MAX = 6;
@@ -252,14 +270,6 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
   }
 }
 
-async function reconstructGenericFromCsv(
-  label: string,
-  csvPath: string,
-  storageKey: string
-): Promise<GenericSummary | null> {
-  const { reconstructGenericFromCsv: reconstruct } = await import("./pdfBuilder");
-  return reconstruct(label, csvPath, storageKey);
-}
 
 export async function buildPdfPayload({
   aideRef,
@@ -289,8 +299,13 @@ export async function buildPdfPayload({
 
   const genericPayload: Array<{ label: string; summary: GenericSummary }> = [];
 
-  for (const entry of CSV_VULNERABILITY_FORMS) {
-    if (entry.component !== "generic-generic") continue;
+  // Traiter les formulaires de vulnérabilité et de problèmes médicaux
+  const allGenericForms = [
+    ...CSV_VULNERABILITY_FORMS.filter(f => f.component === "generic-generic"),
+    ...CSV_MEDICAL_ISSUES_FORMS.filter(f => f.component === "generic-generic")
+  ];
+
+  for (const entry of allGenericForms) {
 
     const storageKey = entry.storageKey;
     let summary: GenericSummary | null = null;
@@ -303,11 +318,7 @@ export async function buildPdfPayload({
     }
 
     if (!summary) {
-      const rebuilt = await reconstructGenericFromCsv(
-        entry.label,
-        entry.path,
-        storageKey
-      );
+      const rebuilt = await reconstructGenericFromCsv(entry);
       if (rebuilt && rebuilt.kind === "generic") {
         summary = rebuilt;
       }

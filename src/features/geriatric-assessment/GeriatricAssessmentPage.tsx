@@ -27,7 +27,8 @@ export default function FormulaireIndex() {
             onCategoryChange={navigation.actions.handleCategoryChange}
             activeFragTab={navigation.state.activeFragTab}
             onFragTabChange={navigation.actions.handleFragTabChange}
-            dynamicFragSubtabs={navigation.state.dynamicFragSubtabs}
+            dynamicSubtabs={navigation.state.dynamicSubtabs}
+            hasSubtabs={navigation.state.hasSubtabs}
           />
 
           <FormSection
@@ -48,7 +49,8 @@ export default function FormulaireIndex() {
             onCategoryChange={navigation.actions.handleCategoryChange}
             activeFragTab={navigation.state.activeFragTab}
             onFragTabChange={navigation.actions.handleFragTabChange}
-            dynamicFragSubtabs={navigation.state.dynamicFragSubtabs}
+            dynamicSubtabs={navigation.state.dynamicSubtabs}
+            hasSubtabs={navigation.state.hasSubtabs}
             isMobile={true}
           />
 

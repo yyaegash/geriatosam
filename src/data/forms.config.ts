@@ -7,7 +7,7 @@ export type FormComponentType = "aide" | "dep" | "generic-generic";
 export interface FormConfig {
   key: string;
   label: string;
-  path: string;
+  csvImport?: () => Promise<string>;  // Import dynamique pour les CSV
   component: FormComponentType;
   storageKey: string;
 }
@@ -19,77 +19,77 @@ export const CSV_VULNERABILITY_FORMS: FormConfig[] = [
   {
     key: "aide",
     label: "Aide en place et fréquence",
-    path: "/aide_en_place.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/aide_en_place.csv?raw").then(m => m.default),
     component: "aide" as const,
     storageKey: "geriatrie.form.aide.v1"
   },
   {
     key: "iso",
     label: "Isolement",
-    path: "/isolement.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/isolement.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.isolement.v1"
   },
   {
     key: "dep",
     label: "Dépendance",
-    path: "/dependance.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/dependance.csv?raw").then(m => m.default),
     component: "dep" as const,
     storageKey: "geriatrie.form.dependance.v1"
   },
   {
     key: "habit",
     label: "Habitation inadaptée",
-    path: "/habitation_inadaptee.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/habitation_inadaptee.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.habitation.v1"
   },
   {
     key: "neuroco",
     label: "Troubles neurocognitifs",
-    path: "/trouble_neuroco.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/trouble_neuroco.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.neuroco.v1"
   },
   {
     key: "psy",
     label: "Troubles psychiques",
-    path: "/trouble_psy.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/trouble_psy.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.psy.v1"
   },
   {
     key: "musculo",
     label: "Troubles musculosquelettiques",
-    path: "/trouble_musculo.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/trouble_musculo.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.musculo.v1"
   },
   {
     key: "denut",
     label: "Dénutrition",
-    path: "/denutrition.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/denutrition.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.denutrition.v1"
   },
   {
     key: "neuro",
     label: "Troubles neurosensoriels",
-    path: "/trouble_neuro.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/trouble_neuro.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.neuro.v1"
   },
   {
     key: "polypathologie",
     label: "Polypathologie",
-    path: "/polypathologie.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/polypathologie.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.polypathologie.v1"
   },
   {
     key: "polymedication",
     label: "Polymédication et traitement à risque",
-    path: "/polymedication.csv",
+    csvImport: () => import("@/assets/csv/vulnerability/polymedication.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.polymedication.v1"
   },
@@ -102,59 +102,59 @@ export const CSV_MEDICAL_ISSUES_FORMS: FormConfig[] = [
   {
     key: "vaccination",
     label: "Vaccinations à compléter",
-    path: "/vaccination.csv",
+    csvImport: () => import("@/assets/csv/medicalIssue/vaccination.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.vaccination.v1"
   },
   {
     key: "sommeil",
     label: "Troubles du sommeil",
-    path: "/trouble_sommeil.csv",
+    csvImport: () => import("@/assets/csv/medicalIssue/trouble_sommeil.csv?raw").then(m => m.default),
     component: "generic-generic" as const,
     storageKey: "geriatrie.form.sommeil.v1"
   },
-  {
-    key: "incontinence",
-    label: "Incontinence urinaire",
-    path: "/incontinence_ur.csv",
-    component: "generic-generic" as const,
-    storageKey: "geriatrie.form.incontinence_ur.v1"
-  },
-  {
-    key: "constipation",
-    label: "Constipation",
-    path: "/constipation.csv",
-    component: "generic-generic" as const,
-    storageKey: "geriatrie.form.constipation.v1"
-  },
-  {
-    key: "douleur",
-    label: "Douleur",
-    path: "/douleur.csv",
-    component: "generic-generic" as const,
-    storageKey: "geriatrie.form.douleur.v1"
-  },
-  {
-    key: "hypotension",
-    label: "Hypotension orthostatique",
-    path: "/hypotension.csv",
-    component: "generic-generic" as const,
-    storageKey: "geriatrie.form.hypotension.v1"
-  },
-  {
-    key: "alitement",
-    label: "Alitement prolongé",
-    path: "/alitement.csv",
-    component: "generic-generic" as const,
-    storageKey: "geriatrie.form.alitement.v1"
-  },
-  {
-    key: "trouble_erection",
-    label: "Troubles de l'érection",
-    path: "/trouble_erection.csv",
-    component: "generic-generic" as const,
-    storageKey: "geriatrie.form.trouble_erection.v1"
-  },
+   {
+     key: "incontinence",
+     label: "Incontinence urinaire",
+     csvImport: () => import("@/assets/csv/medicalIssue/incontinence_urinaire.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.incontinence_urinaire.v1"
+   },
+   {
+     key: "constipation",
+     label: "Constipation",
+     csvImport: () => import("@/assets/csv/medicalIssue/constipation.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.constipation.v1"
+   },
+   {
+     key: "douleur",
+     label: "Douleur",
+     csvImport: () => import("@/assets/csv/medicalIssue/douleur.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.douleur.v1"
+   },
+   {
+     key: "hypotension",
+     label: "Hypotension orthostatique",
+     csvImport: () => import("@/assets/csv/medicalIssue/hypotension.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.hypotension.v1"
+   },
+   {
+     key: "alitement",
+     label: "Alitement prolongé",
+     csvImport: () => import("@/assets/csv/medicalIssue/alitement.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.alitement.v1"
+   },
+   {
+     key: "trouble_erection",
+     label: "Troubles de l'érection",
+     csvImport: () => import("@/assets/csv/medicalIssue/erection.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.trouble_erection.v1"
+   },
 ];
 
 /**

@@ -6,6 +6,7 @@ import React, { useImperativeHandle, useMemo } from "react";
 import { QuestionField } from "@/components/QuestionField";
 import { useCsvForm, useFormLock, useFormReport } from "../shared/hooks";
 import { GenericSummary } from "../shared/types";
+import type { FormConfig } from "@/data/forms.config";
 import { calculateQualityColor, norm } from "../shared/utils";
 
 export type GenericCsvFormHandle = {
@@ -14,21 +15,15 @@ export type GenericCsvFormHandle = {
 };
 
 type Props = {
-  csvPath: string;
-  sectionName: string;
-  storageKey: string;
+  config: FormConfig;
   mode?: "generic" | "isolement";
 };
 
 export default React.forwardRef<GenericCsvFormHandle, Props>(function GenericCsvForm(
-  { csvPath, sectionName, storageKey, mode = "generic" },
+  { config, mode = "generic" },
   ref
 ) {
-  const { questions, answers, isLoading, setAnswer, clearLocal } = useCsvForm({
-    csvPath,
-    storageKey,
-    sectionName
-  });
+  const { questions, answers, isLoading, setAnswer, clearLocal } = useCsvForm(config);
 
   const isLocked = useFormLock(questions, answers);
   const report = useFormReport(questions, answers, isLocked);

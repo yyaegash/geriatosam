@@ -1,6 +1,7 @@
 import Papa from "papaparse";
 import type { PdfPayload, HistoColor } from "../types";
 import type { GenericSummary } from "../../Questions";
+import type { FormConfig } from "@/data/forms.config";
 
 /* -------------------------------------------------
    Helpers normalisation & parsing
@@ -70,11 +71,10 @@ function tryGetFromStorageGeneric(...keys: string[]): Record<string, string> | n
 }
 
 export async function reconstructGenericFromCsv(
-  sectionName: string,
-  csvPath: string,
-  storageKey: string
+  config: FormConfig
 ): Promise<GenericSummary | null> {
   try {
+    const { label: sectionName, path: csvPath, storageKey, csvImport } = config;
     const csvName = csvPath.replace(/^\//, '').replace(/\.csv$/, '');
     const sectionNorm = norm(sectionName).replace(/-/g, '_');
     const csvNorm = csvName.replace(/[^a-zA-Z0-9]/g, '_');
@@ -94,9 +94,10 @@ export async function reconstructGenericFromCsv(
 
     if (!answers || Object.keys(answers).length === 0) return null;
 
-    const response = await fetch(csvPath, { cache: "no-store" });
-    if (!response.ok) return null;
-    const text = await response.text();
+    // Utiliser csvImport si disponible, sinon fetch
+    const text = csvImport
+      ? await csvImport()
+      : await fetch(csvPath, { cache: "no-store" }).then(response => response.text());
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,
@@ -313,12 +314,22 @@ export async function generateGeriatriePdf(payload: PdfPayload): Promise<void> {
     }
   }
 
+  console.log("🔍 Dependence payload:", payload.dependence);
+  if (payload.dependence?.report) {
+    console.log("🔍 Dependence report:", payload.dependence.report);
+    console.log("🔍 Reperage length:", payload.dependence.report.reperage.length);
+    console.log("🔍 Proposition length:", payload.dependence.report.proposition.length);
+  }
+
   if (payload.dependence?.report &&
       (payload.dependence.report.reperage.length > 0 || payload.dependence.report.proposition.length > 0)) {
+    console.log("✅ Adding dependence to PDF report");
     allFormsWithReport.push({
       label: "Dépendance",
       report: payload.dependence.report
     });
+  } else {
+    console.log("❌ Dependence not added to PDF report");
   }
 
   const configOrder = ["Isolement", "Dépendance", "Habitation inadaptée", "Troubles neurocognitifs", "Troubles psychiques", "Troubles musculosquelettiques", "Dénutrition", "Troubles neurosensoriels", "Polypathologie", "Polymédication et traitement à risque"];

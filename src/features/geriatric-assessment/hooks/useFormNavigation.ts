@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { CSV_VULNERABILITY_FORMS, type FormConfig } from "@/data/forms.config";
+import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, type FormConfig } from "@/data/forms.config";
 
 /**
  * Hook personnalisé pour gérer la navigation entre sections et formulaires
@@ -10,36 +10,61 @@ export function useFormNavigation() {
   const [activeCategory, setActiveCategory] = useState("Fragilité");
   const [activeFragTab, setActiveFragTab] = useState<string>("");
 
-  // Calculer les sous-onglets dynamiques pour la section Fragilité
-  const dynamicFragSubtabs = useMemo(
-    () => CSV_VULNERABILITY_FORMS.map((c) => c.label),
-    []
-  );
+  // Normalisation robuste qui ignore les espaces et caractères invisibles
+  const normalize = (str: string) =>
+    str.trim().toLowerCase().replace(/\s+/g, ' ').normalize('NFC');
+
+  const normalizedCategory = normalize(activeCategory);
+
+  // Calculer les sous-onglets dynamiques selon la section
+  const dynamicSubtabs = useMemo(() => {
+    if (normalizedCategory.includes('fragilité') || normalizedCategory.includes('fragilit')) {
+      return CSV_VULNERABILITY_FORMS.map((c) => c.label);
+    } else if (normalizedCategory.includes('problèmes médicaux') ||
+               normalizedCategory.includes('problemes medicaux') ||
+               normalizedCategory.includes('medical')) {
+      return CSV_MEDICAL_ISSUES_FORMS.map((c) => c.label);
+    } else {
+      return [];
+    }
+  }, [normalizedCategory]);
 
   // Initialiser le premier onglet si pas encore défini
   useMemo(() => {
-    if (!activeFragTab && dynamicFragSubtabs.length > 0) {
-      setActiveFragTab(dynamicFragSubtabs[0]);
+    if (!activeFragTab && dynamicSubtabs.length > 0) {
+      setActiveFragTab(dynamicSubtabs[0]);
     }
-  }, [activeFragTab, dynamicFragSubtabs]);
+  }, [activeFragTab, dynamicSubtabs]);
 
   // Calculer les états dérivés
-  const isFragilite = activeCategory === "Fragilité";
+  const isFragilite = normalizedCategory.includes('fragilité') || normalizedCategory.includes('fragilit');
+  const isProblemsMedicaux = normalizedCategory.includes('problèmes médicaux') ||
+                            normalizedCategory.includes('problemes medicaux') ||
+                            normalizedCategory.includes('medical');
+  const hasSubtabs = isFragilite || isProblemsMedicaux;
 
   // Trouver le formulaire actuel
-  const currentForm = useMemo<FormConfig | null>(
-    () => CSV_VULNERABILITY_FORMS.find((c) => c.label === activeFragTab) ?? null,
-    [activeFragTab]
-  );
+  const currentForm = useMemo<FormConfig | null>(() => {
+    const allForms = [...CSV_VULNERABILITY_FORMS, ...CSV_MEDICAL_ISSUES_FORMS];
+    return allForms.find((c) => c.label === activeFragTab) ?? null;
+  }, [activeFragTab]);
 
   /**
    * Gestionnaire pour changer de section principale
    */
   const handleCategoryChange = (newCategory: string) => {
     setActiveCategory(newCategory);
-    // Si on revient à Fragilité, réinitialiser le premier onglet
-    if (newCategory === "Fragilité" && dynamicFragSubtabs.length > 0) {
-      setActiveFragTab(dynamicFragSubtabs[0]);
+    // Réinitialiser l'onglet actif selon la nouvelle section
+    const newSubtabs = newCategory === "Fragilité"
+      ? CSV_VULNERABILITY_FORMS.map((c) => c.label)
+      : newCategory === "Problèmes médicaux"
+      ? CSV_MEDICAL_ISSUES_FORMS.map((c) => c.label)
+      : [];
+
+    if (newSubtabs.length > 0) {
+      setActiveFragTab(newSubtabs[0]);
+    } else {
+      setActiveFragTab("");
     }
   };
 
@@ -56,8 +81,10 @@ export function useFormNavigation() {
       activeCategory,
       activeFragTab,
       isFragilite,
+      isProblemsMedicaux,
+      hasSubtabs,
       currentForm,
-      dynamicFragSubtabs,
+      dynamicSubtabs,
     },
 
     // Actions

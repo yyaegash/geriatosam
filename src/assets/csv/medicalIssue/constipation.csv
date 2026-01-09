@@ -1,0 +1,6 @@
+;Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+0;Constipation;Constipation;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+1;Constipation;Constipation;2;Constipation de progression;radio;Oui:50|Non:0;;Oui;De progression;Bilan si constipation de novo +- coloscopie.|Si chronique réévaluer les causes de la constipation et les possibilités de prise en charge.|RHD : Hydratation 1,5 L/j, Fibre <25g/j, exercice physique, temps programmé pour organiser les selles 30 minutes après le repas. Traitement par Laxatif de lest ou PEG en première intention.
+2;Constipation;Constipation;3;Constipation terminale, dyschésie;radio;Oui:50|Non:0;;Oui;Terminale  ;Bilan si constipation de novo +- coloscopie.|Si chronique réévaluer les causes de la constipation et les possibilités de prise en charge.|RHD : Hydratation 1,5 L/j, Fibre <25g/j, exercice physique, temps programmé pour organiser les selles 30 minutes après le repas. Traitement par Laxatif de lest ou PEG en première intention|Pour la dyschésie : Laxatifs par voie rectale : Lavement (Normacol…) si problème aigu, suppositoire (Eductyl…) si constipation chronique
+3;Constipation;Constipation;4;Retentissement important;radio;Oui:100|Non:0;;;;
+4;Constipation;Constipation;5;Qualité de la prise en charge actuelle;radio;Bonne|Partielle|Insuffisante;color;;;

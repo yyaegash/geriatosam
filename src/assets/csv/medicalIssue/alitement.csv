@@ -1,0 +1,5 @@
+Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+Alitement prolongé;Alitement prolongé;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+Alitement prolongé;Alitement prolongé;2;"Alitement prolongé (>12 heures/jour)";radio;Oui:50|Non:0;;Oui;;"Limiter le risque de complication de décubitus.|Bas de contention veineuse pour éviter la MTEV.|Position demi assise pour ouvrir les voies respiratoires, limiter le risque de pneumopathie d’inhalation pour manger.|Adaptation du traitement anti HTA à la baisse de tension artérielle.|Matelas adapté selon l’échelle de Braden-massage cutané-nutrition adapté-changement de position pour éviter les escarres.|Mise au fauteuil, Kinésithérapie, adaptation de l’environnement avec l’ergothérapeute, traitement de l’ostéoporose, pour préserver la fonction locomotrice.|Laxatif pour prévenir la constipation et les retentissements urinaires.|Soutien psychologique.|Prise en charge de la douleur"
+Alitement prolongé;Alitement prolongé;3;Complication de décubitus;radio;Oui:100|Non:0;;;;
+Alitement prolongé;Alitement prolongé;4;Qualité de la prise en charge actuelle;radio;Bonne|Partielle|Insuffisante;color;;;

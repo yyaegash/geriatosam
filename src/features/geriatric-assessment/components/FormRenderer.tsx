@@ -85,9 +85,7 @@ function renderFormByType(
       return (
         <GenericCsvForm
           ref={refs.genericRef}
-          csvPath={form.path}
-          sectionName={form.label}
-          storageKey={form.storageKey}
+          config={form}
           mode="generic"
         />
       );
