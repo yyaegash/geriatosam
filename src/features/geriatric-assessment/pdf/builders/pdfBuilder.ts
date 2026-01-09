@@ -315,22 +315,12 @@ export async function generateGeriatriePdf(payload: PdfPayload): Promise<void> {
     }
   }
 
-  console.log("🔍 Dependence payload:", payload.dependence);
-  if (payload.dependence?.report) {
-    console.log("🔍 Dependence report:", payload.dependence.report);
-    console.log("🔍 Reperage length:", payload.dependence.report.reperage.length);
-    console.log("🔍 Proposition length:", payload.dependence.report.proposition.length);
-  }
-
   if (payload.dependence?.report &&
       (payload.dependence.report.reperage.length > 0 || payload.dependence.report.proposition.length > 0)) {
-    console.log("✅ Adding dependence to PDF report");
     allFormsWithReport.push({
       label: "Dépendance",
       report: payload.dependence.report
     });
-  } else {
-    console.log("❌ Dependence not added to PDF report");
   }
 
   const configOrder = ["Isolement", "Dépendance", "Habitation inadaptée", "Troubles neurocognitifs", "Troubles psychiques", "Troubles musculosquelettiques", "Dénutrition", "Troubles neurosensoriels", "Polypathologie", "Polymédication et traitement à risque"];

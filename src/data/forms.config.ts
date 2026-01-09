@@ -188,6 +188,26 @@ export const CSV_SOCIAL_ENVIRONMENTAL_ISSUES: FormConfig[] = [
   },
 ];
 
+export const CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS: FormConfig[] = [
+  {
+     key: "reperage_clinique",
+     label: "Repérage clinique",
+     csvImport: () => import("@/assets/csv/clinicalIdentification/reperage_clinique.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.reperage_clinique.v1"
+  }
+]
+
+export const CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS: FormConfig[] = [
+  {
+     key: "reperage_biologique",
+     label: "Repérage biologique",
+     csvImport: () => import("@/assets/csv/biologicalIdentification/reperage_biologique.csv?raw").then(m => m.default),
+     component: "generic-generic" as const,
+     storageKey: "geriatrie.form.reperage_biologique.v1"
+  }
+]
+
 /**
  * Mappage des sections vers leurs formulaires
  */
@@ -195,6 +215,7 @@ export const FORM_SECTIONS = {
   vulnerability: CSV_VULNERABILITY_FORMS,
   medicalIssues: CSV_MEDICAL_ISSUES_FORMS,
   socialEnvironmentalIssues: CSV_SOCIAL_ENVIRONMENTAL_ISSUES,
+  clinicIdentificationIssues: CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS,
 } as const;
 
 /**
@@ -203,4 +224,5 @@ export const FORM_SECTIONS = {
 export type AllFormConfigs =
   typeof CSV_VULNERABILITY_FORMS[number] |
   typeof CSV_MEDICAL_ISSUES_FORMS[number] |
-  typeof CSV_SOCIAL_ENVIRONMENTAL_ISSUES[number];
+  typeof CSV_SOCIAL_ENVIRONMENTAL_ISSUES[number] |
+  typeof CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS[number];

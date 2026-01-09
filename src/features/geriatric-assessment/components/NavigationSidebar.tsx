@@ -67,7 +67,6 @@ export function NavigationSidebar({
           items={[...FORM_CATEGORIES]}
           active={activeCategory}
           onSelect={onCategoryChange}
-          title="Sections"
         />
       </aside>
 
@@ -78,7 +77,6 @@ export function NavigationSidebar({
             items={[...dynamicSubtabs]}
             active={activeFragTab}
             onSelect={onFragTabChange}
-            title={`${activeCategory} — catégories`}
           />
         ) : (
           <div className="text-sm text-gray-500 px-1 pt-1">—</div>

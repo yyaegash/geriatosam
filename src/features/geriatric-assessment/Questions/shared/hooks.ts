@@ -77,9 +77,16 @@ export function useCsvForm(config: FormConfig) {
     }
 
     // Utiliser csvImport si disponible, sinon fetch
-    const csvPromise = config.csvImport
-      ? config.csvImport()
-      : fetch(config.csvPath).then(response => response.text());
+    if (!config.csvImport) {
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: "CSV import function not available"
+      }));
+      return;
+    }
+
+    const csvPromise = config.csvImport();
 
     csvPromise
       .then(csvText => {
@@ -110,7 +117,7 @@ export function useCsvForm(config: FormConfig) {
           error: error.message
         }));
       });
-  }, [config.csvPath, config.csvImport, config.sectionName, config.groupName, config.storageKey]);
+  }, [config.csvImport, config.storageKey]);
 
   return {
     ...state,
@@ -131,16 +138,26 @@ function processQuestions(rows: CsvRow[], config: FormConfig): BaseQuestion[] {
       const matchFields = [row.Section, row.Group].filter(Boolean);
       if (!matchFields.length) return true;
 
-      // Si on a un sectionName ou groupName, on filtre
-      if (config.sectionName) {
-        return matchFields.some(field =>
-          norm(String(field)) === norm(config.sectionName!)
-        );
-      }
-      if (config.groupName) {
-        return matchFields.some(field =>
-          norm(String(field)) === norm(config.groupName!)
-        );
+      // Si on a un label, on filtre avec une logique plus flexible
+      if (config.label) {
+        const normalizedLabel = norm(config.label);
+        return matchFields.some(field => {
+          const normalizedField = norm(String(field));
+          // Vérification exacte d'abord
+          if (normalizedField === normalizedLabel) return true;
+
+          // Vérification si le label est contenu dans le champ ou vice versa
+          if (normalizedField.includes(normalizedLabel) || normalizedLabel.includes(normalizedField)) return true;
+
+          // Vérification par mots-clés pour des cas comme "Repérage clinique" vs "Repérage de signes cliniques"
+          const labelWords = normalizedLabel.split('-').filter(w => w.length > 2);
+          const fieldWords = normalizedField.split('-').filter(w => w.length > 2);
+
+          // Si tous les mots du label sont présents dans le champ
+          return labelWords.length > 0 && labelWords.every(word =>
+            fieldWords.some(fieldWord => fieldWord.includes(word) || word.includes(fieldWord))
+          );
+        });
       }
 
       return true;
@@ -153,7 +170,7 @@ function processQuestions(rows: CsvRow[], config: FormConfig): BaseQuestion[] {
     const role = normalizeRole(row.Role, row.Question);
     const { shown, raw } = parseChoices(row.Options, true);
 
-    const sectionName = config.sectionName || config.groupName || row.Section || row.Group || "unknown";
+    const sectionName = config.label || row.Section || row.Group || "unknown";
 
     // Si pas de label, essayer de générer un depuis les options ou section
     let questionLabel = row.Question?.trim() || "";

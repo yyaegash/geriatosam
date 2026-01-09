@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, CSV_SOCIAL_ENVIRONMENTAL_ISSUES } from "@/data/forms.config";
+import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, CSV_SOCIAL_ENVIRONMENTAL_ISSUES, CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS, CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS } from "@/data/forms.config";
 import { normalizeId } from "../../Questions/shared/utils";
 import { reconstructGenericFromCsv } from "./pdfBuilder";
 import type {
@@ -177,8 +177,8 @@ async function reconstructDependenceFromLocalStorage(): Promise<DependenceSummar
       const questionNorm = norm(q.Question).replace(/[^a-z0-9]+/g, "-");
       const sectionNorm = norm(DEP_CONFIG.label);
 
-      const isADL = norm(q.Section) === norm("ADL") || q.Question.toLowerCase().includes("autonomie pour");
-      const isIADL = norm(q.Section) === norm("IADL") || ["téléphone", "courses", "repas", "ménage", "lessive", "transport", "médicament", "finance"]
+      const isADL = (q.Section && norm(q.Section) === norm("ADL")) || q.Question.toLowerCase().includes("autonomie pour");
+      const isIADL = (q.Section && norm(q.Section) === norm("IADL")) || ["téléphone", "courses", "repas", "ménage", "lessive", "transport", "médicament", "finance"]
         .some(keyword => q.Question.toLowerCase().includes(keyword));
 
       const possibleIds = [
@@ -300,11 +300,13 @@ export async function buildPdfPayload({
 
   const genericPayload: Array<{ label: string; summary: GenericSummary }> = [];
 
-  // Traiter les formulaires de vulnérabilité, problèmes médicaux et sociaux-environnementaux
+  // Traiter tous les formulaires génériques
   const allGenericForms = [
     ...CSV_VULNERABILITY_FORMS.filter(f => f.component === "generic-generic"),
     ...CSV_MEDICAL_ISSUES_FORMS.filter(f => f.component === "generic-generic"),
-    ...CSV_SOCIAL_ENVIRONMENTAL_ISSUES.filter(f => f.component === "generic-generic")
+    ...CSV_SOCIAL_ENVIRONMENTAL_ISSUES.filter(f => f.component === "generic-generic"),
+    ...CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS.filter(f => f.component === "generic-generic"),
+    ...CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS.filter(f => f.component === "generic-generic")
   ];
 
   for (const entry of allGenericForms) {

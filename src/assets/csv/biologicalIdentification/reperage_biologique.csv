@@ -1,0 +1,10 @@
+Group;Section;QPos;Question;Type;Options;Role;TriggerReportOn;Surveillance;Actions
+Repérage biologique;Repérage biologique;1;À revoir;radio;Oui|Non;lock;Oui;À revoir;
+Repérage biologique;Repérage biologique;2;Anémie;radio;Oui|Non;;Oui;Anémie;"Bilan d’anémie complet. Cause multifactorielle fréquentes."
+Repérage biologique;Repérage biologique;3;Syndrome inflammatoire;radio;Oui|Non;;Oui;Syndrome inflammatoire;"Bilan de syndrome inflammatoire complet. Avec l’âge, en dehors d’un contexte évident, éliminer les arguments en faveur d’une pathologie néoplasique sous-jacente"
+Repérage biologique;Repérage biologique;4;Diabète;radio;Oui|Non;;Oui;Diabète;"Bilan de découverte de diabète et prise en charge spécifique chez la personne âgée"
+Repérage biologique;Repérage biologique;5;Insuffisance rénale;radio;Oui|Non;;Oui;Insuffisance rénale;"Bilan d’insuffisance rénale complet (biologique et radiologique). Pensez à vérifier la posologie des traitements en fonction de la clairance"
+Repérage biologique;Repérage biologique;6;"Troubles ioniques notamment de la natrémie";radio;Oui|Non;;Oui;"Troubles ioniques notamment de la natrémie";"Bilan spécifique en fonction du trouble ionique"
+Repérage biologique;Repérage biologique;7;Perturbation du bilan hépatique;radio;Oui|Non;;Oui;Perturbation du bilan hépatique;"Bilan de perturbation du bilan hépatique complet (biologique et radiologique)"
+Repérage biologique;Repérage biologique;8;Baisse de l’albumine;radio;Oui|Non;;Oui;Baisse de l’albumine;"Bilan étiologique et nutritionnel +- prise en charge"
+Repérage biologique;Repérage biologique;9;Pic monoclonal à l’EPP;radio;Oui|Non;;Oui;Pic monoclonal à l’EPP;"Bilan pour éliminer un myélome devant un pic monoclonal"

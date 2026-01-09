@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, CSV_SOCIAL_ENVIRONMENTAL_ISSUES, type FormConfig } from "@/data/forms.config";
+import { CSV_VULNERABILITY_FORMS, CSV_MEDICAL_ISSUES_FORMS, CSV_SOCIAL_ENVIRONMENTAL_ISSUES, CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS, CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS, type FormConfig } from "@/data/forms.config";
 
 /**
  * Hook personnalisé pour gérer la navigation entre sections et formulaires
@@ -18,16 +18,11 @@ export function useFormNavigation() {
 
   // Calculer les sous-onglets dynamiques selon la section
   const dynamicSubtabs = useMemo(() => {
-    console.log('🔍 Navigation - activeCategory:', activeCategory);
-    console.log('🔍 Navigation - normalizedCategory:', normalizedCategory);
-
     if (normalizedCategory.includes('fragilité') || normalizedCategory.includes('fragilit')) {
-      console.log('✅ Detected Fragilité section');
       return CSV_VULNERABILITY_FORMS.map((c) => c.label);
     } else if (normalizedCategory.includes('problèmes médicaux') ||
                normalizedCategory.includes('problemes medicaux') ||
                normalizedCategory.includes('medical')) {
-      console.log('✅ Detected Problèmes médicaux section');
       return CSV_MEDICAL_ISSUES_FORMS.map((c) => c.label);
     } else if (normalizedCategory.includes('problèmes sociaux-environnementaux') ||
                normalizedCategory.includes('problemes sociaux-environnementaux') ||
@@ -36,11 +31,16 @@ export function useFormNavigation() {
                normalizedCategory.includes('social') ||
                normalizedCategory.includes('environnement') ||
                normalizedCategory.includes('environement')) {
-      console.log('✅ Detected Problèmes sociaux-environnementaux section');
-      console.log('🔍 CSV_SOCIAL_ENVIRONMENTAL_ISSUES:', CSV_SOCIAL_ENVIRONMENTAL_ISSUES);
       return CSV_SOCIAL_ENVIRONMENTAL_ISSUES.map((c) => c.label);
+    } else if (normalizedCategory.includes('repérage clinique') ||
+               normalizedCategory.includes('reperage clinique') ||
+               normalizedCategory.includes('clinique')) {
+      return CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS.map((c) => c.label);
+    } else if (normalizedCategory.includes('repérage biologique') ||
+               normalizedCategory.includes('reperage biologique') ||
+               normalizedCategory.includes('biologique')) {
+      return CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS.map((c) => c.label);
     } else {
-      console.log('❌ No section detected');
       return [];
     }
   }, [normalizedCategory]);
@@ -64,11 +64,17 @@ export function useFormNavigation() {
                                            normalizedCategory.includes('social') ||
                                            normalizedCategory.includes('environnement') ||
                                            normalizedCategory.includes('environement');
-  const hasSubtabs = isFragilite || isProblemsMedicaux || isProblemsSociauxEnvironnementaux;
+  const isReperageClinique = normalizedCategory.includes('repérage clinique') ||
+                            normalizedCategory.includes('reperage clinique') ||
+                            normalizedCategory.includes('clinique');
+  const isReperageBiologique = normalizedCategory.includes('repérage biologique') ||
+                              normalizedCategory.includes('reperage biologique') ||
+                              normalizedCategory.includes('biologique');
+  const hasSubtabs = isFragilite || isProblemsMedicaux || isProblemsSociauxEnvironnementaux || isReperageClinique || isReperageBiologique;
 
   // Trouver le formulaire actuel
   const currentForm = useMemo<FormConfig | null>(() => {
-    const allForms = [...CSV_VULNERABILITY_FORMS, ...CSV_MEDICAL_ISSUES_FORMS, ...CSV_SOCIAL_ENVIRONMENTAL_ISSUES];
+    const allForms = [...CSV_VULNERABILITY_FORMS, ...CSV_MEDICAL_ISSUES_FORMS, ...CSV_SOCIAL_ENVIRONMENTAL_ISSUES, ...CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS, ...CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS];
     return allForms.find((c) => c.label === activeFragTab) ?? null;
   }, [activeFragTab]);
 
@@ -84,6 +90,10 @@ export function useFormNavigation() {
       ? CSV_MEDICAL_ISSUES_FORMS.map((c) => c.label)
       : (newCategory === "Problèmes sociaux-environnementaux" || newCategory === "Problèmes sociaux-environementaux")
       ? CSV_SOCIAL_ENVIRONMENTAL_ISSUES.map((c) => c.label)
+      : newCategory === "Repérage clinique"
+      ? CSV_CLINIC_IDENTIFICATION_ISSUES_FORMS.map((c) => c.label)
+      : newCategory === "Repérage biologique"
+      ? CSV_BIOLOGICAL_IDENTIFICATION_ISSUES_FORMS.map((c) => c.label)
       : [];
 
     if (newSubtabs.length > 0) {
@@ -108,6 +118,8 @@ export function useFormNavigation() {
       isFragilite,
       isProblemsMedicaux,
       isProblemsSociauxEnvironnementaux,
+      isReperageClinique,
+      isReperageBiologique,
       hasSubtabs,
       currentForm,
       dynamicSubtabs,

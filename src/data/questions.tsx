@@ -5,6 +5,6 @@ export const FORM_CATEGORIES: string[] = [
   "Problèmes sociaux-environementaux",
   "Repérage clinique",
   "Repérage biologique",
-  "Fiche de fragilités phénotypiques",
-  "Fiche d'informations personnelles",
+//  "Fiche de fragilités phénotypiques",
+//  "Fiche d'informations personnelles",
 ];
