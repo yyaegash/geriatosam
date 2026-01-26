@@ -59,7 +59,7 @@ export function FormSection({
         refs={refs}
       />
 
-      <div aria-hidden className="h-24 md:h-16"></div>
+      <div aria-hidden className="h-24 md:h-0"></div>
 
       <SubmitBar
         onSubmit={onPreview}
